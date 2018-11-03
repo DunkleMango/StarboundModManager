@@ -45,14 +45,14 @@ Don't worry about having to repeat this process. All changes will be automatical
 If you want to transfer mods from your Steam-workshop directory to your Starbound mods folder, you can follow this quick guide.  
 
 Start by selecting all mods that you want to transfer from the left list of files (tick the checkboxes).  
-Then press the button **[Transfer Selected]** and confirm the operation.  
+Then press the button **[Transfer selected]** and confirm the operation.  
 
 This process will override any existing files with the same name in your mods directory (the list of mods on the right).  
 
 ![Application started](https://i.imgur.com/kCZEEzx.png)  
 
 On the other hand, if you want to just delete a few mods from the mods directory of Starbound, you will have to select the mods on the right.  
-Then press the button **[Delete selected]** check **carfully**, if those are the right files to delete and confirm the operation.  
+Then press the button **[Delete selected]** check **carefully**, if those are the right files to delete and confirm the operation.  
 
 This will get rid of any selected mods, **PERMANENTLY** removing them from the system.  
 So the deleted files will not be moved to your recycle bin, but removed completely.  
