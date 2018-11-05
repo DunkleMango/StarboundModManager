@@ -1,16 +1,18 @@
 package gui;
 
+import data.ModFile;
+import exceptions.ModFileGenerationException;
+import exceptions.ModFileNotFoundException;
 import gui.cells.CheckBoxCell;
 import gui.cells.RepresentingType;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
+import javafx.collections.ObservableSet;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -25,14 +27,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 
 public class MainFrame extends Application {
 
     private ObservableList<String> namedInputDirList = FXCollections.observableArrayList();
     private ObservableList<String> namedOutputFileList = FXCollections.observableArrayList();
-    private ObservableMap<String, File> inputDirMap = FXCollections.observableHashMap();
-    private ObservableMap<String, File> outputFileMap = FXCollections.observableHashMap();
+    private ObservableSet<ModFile> inputDirList = FXCollections.observableSet();
+    private ObservableSet<ModFile> outputFileList = FXCollections.observableSet();
     private ListView<String> outputListView = new ListView<>(namedOutputFileList);
     private ListView<String> inputListView = new ListView<>(namedInputDirList);
     private File inputPath = new File("D:\\Programs\\Steam\\SteamApps\\workshop\\content\\211820");
@@ -54,21 +58,59 @@ public class MainFrame extends Application {
         loadSettings();
         inputField = new TextField(inputPath.getAbsolutePath());
         outputField = new TextField(outputPath.getAbsolutePath());
-        if (inputPath.exists()) addDirectoriesOfPath(inputPath, namedInputDirList, inputDirMap);
-        if (outputPath.exists()) addFilesOfPath(outputPath, namedOutputFileList, outputFileMap);
+        if (inputPath.exists()) addDirectoriesOfPath(inputPath, namedInputDirList, inputDirList);
+        if (outputPath.exists()) addFilesOfPath(outputPath, namedOutputFileList, outputFileList);
 
         setupInputPanels(grid, primaryStage);
         setupOutputPanels(grid, primaryStage);
 
         setupTransferButton(grid);
+        setupUpdateButton(grid);
+
         setupClearButton(grid);
 
-        Scene scene = new Scene(grid, 500, 300);
+        Scene scene = new Scene(grid, 500, 400);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Starbound Mod Manager");
         primaryStage.setResizable(false);
         primaryStage.setOnCloseRequest(event -> saveSettings());
         primaryStage.show();
+    }
+
+    private void setupUpdateButton(GridPane grid) {
+        Alert transferAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        transferAlert.setTitle("Confirmation of transfer");
+        transferAlert.setHeaderText("Do you wish to transfer the following files?");
+
+        Button updateButton = new Button("Update all");
+        updateButton.setOnAction(event -> {
+            ArrayList<String> dirsOfFilesToTransfer = new ArrayList<>();
+            System.out.println(inputDirList);
+            System.out.println(outputFileList);
+            for (ModFile inputModFile : inputDirList) {
+                ModFile outputModFile = null;
+                try {
+                    outputModFile = getModFile(outputFileList, inputModFile.getName() + ".pak");
+                } catch (ModFileNotFoundException e) {
+                    continue;
+                }
+                if (inputModFile != null && outputModFile != null && outputModFile.getName().equals(inputModFile.getName() + ".pak")
+                    && inputModFile.isNewerThan(outputModFile)) {
+                    dirsOfFilesToTransfer.add(inputModFile.getName());
+                    System.out.println(inputModFile.getName());
+                }
+            }
+            if (!dirsOfFilesToTransfer.isEmpty()) {
+                transferAlert.setContentText(getFilesAsText(dirsOfFilesToTransfer, RepresentingType.INPUT));
+                Optional<ButtonType> result = transferAlert.showAndWait();
+                if (result.get() == ButtonType.OK) {
+                    transferFiles(dirsOfFilesToTransfer);
+                    namedOutputFileList.clear();
+                    addFilesOfPath(outputPath, namedOutputFileList, outputFileList);
+                }
+            }
+        });
+        grid.add(updateButton, 1, 4);
     }
 
     private void setupTransferButton(GridPane grid) {
@@ -91,7 +133,7 @@ public class MainFrame extends Application {
                 if (result.get() == ButtonType.OK) {
                     transferFiles(dirsOfFilesToTransfer);
                     namedOutputFileList.clear();
-                    addFilesOfPath(outputPath, namedOutputFileList, outputFileMap);
+                    addFilesOfPath(outputPath, namedOutputFileList, outputFileList);
                 }
             }
         });
@@ -99,16 +141,21 @@ public class MainFrame extends Application {
     }
 
     private void transferFiles(ArrayList<String> dirsOfFilesToTransfer) {
-        dirsOfFilesToTransfer.forEach(name -> {
-            File inputDir = inputDirMap.get(name);
-            if (inputDir.exists()) {
+        for (String name : dirsOfFilesToTransfer) {
+            File inputDir;
+            try {
+                inputDir = getModFile(inputDirList, name).getFile();
+            } catch (ModFileNotFoundException e) {
+                continue;
+            }
+            if (inputDir != null && inputDir.exists()) {
                 File[] subFiles = inputDir.listFiles((subDir, subName) -> subName.toLowerCase().endsWith(".pak"));
                 if (subFiles != null && subFiles.length == 1) {
                     File inputFile = subFiles[0];
                     File outputFile = new File(outputPath.getAbsolutePath() + "\\" +  name + ".pak");
                     if (inputFile.exists() && outputPath.exists()) {
                         try {
-                            if (outputFile.exists()) outputFile.delete();
+                            Files.deleteIfExists(outputFile.toPath());
                             Files.copy(inputFile.toPath(), outputFile.toPath());
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -116,7 +163,7 @@ public class MainFrame extends Application {
                     }
                 }
             }
-        });
+        }
     }
 
     private void setupClearButton(GridPane grid) {
@@ -137,25 +184,39 @@ public class MainFrame extends Application {
                 clearAlert.setContentText(getFilesAsText(filesToDelete, RepresentingType.OUTPUT));
                 Optional<ButtonType> result = clearAlert.showAndWait();
                 if (result.get() == ButtonType.OK) {
-                    filesToDelete.forEach(name -> deletePakFile(outputFileMap.get(name)));
+                    filesToDelete.forEach(name -> {
+                        try {
+                            deletePakFile(getModFile(outputFileList, name).getFile());
+                        } catch (ModFileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    });
                     namedOutputFileList.clear();
-                    addFilesOfPath(outputPath, namedOutputFileList, outputFileMap);
+                    addFilesOfPath(outputPath, namedOutputFileList, outputFileList);
                 }
             }
         });
-        grid.add(clearButton, 1,4);
+        grid.add(clearButton, 1,5);
     }
 
     private String getFilesAsText(ArrayList<String> files, RepresentingType type) {
         StringBuilder builder = new StringBuilder();
         files.forEach(name -> {
-            File file;
+            File file = null;
             switch (type) {
                 case INPUT:
-                    file = inputDirMap.get(name);
+                    try {
+                        file = getModFile(inputDirList, name).getFile();
+                    } catch (ModFileNotFoundException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case OUTPUT:
-                    file = outputFileMap.get(name);
+                    try {
+                        file = getModFile(outputFileList, name).getFile();
+                    } catch (ModFileNotFoundException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 default:
                     file = null;
@@ -166,6 +227,13 @@ public class MainFrame extends Application {
             }
         });
         return builder.toString();
+    }
+
+    private ModFile getModFile(Collection<ModFile> collection, String name) throws ModFileNotFoundException {
+        for (ModFile modFile : collection) {
+            if (modFile.getName().equals(name)) return modFile;
+        }
+        throw new ModFileNotFoundException(name);
     }
 
     private void saveSettings() {
@@ -206,7 +274,7 @@ public class MainFrame extends Application {
             File path = outputDirectoryChooser.showDialog(primaryStage);
             if (path != null && path.isDirectory()) {
                 namedOutputFileList.clear();
-                addFilesOfPath(path, namedOutputFileList, outputFileMap);
+                addFilesOfPath(path, namedOutputFileList, outputFileList);
                 outputPath = path;
                 updateOutputField();
             }
@@ -232,7 +300,7 @@ public class MainFrame extends Application {
             File path = inputDirectoryChooser.showDialog(primaryStage);
             if (path != null && path.isDirectory()) {
                 namedInputDirList.clear();
-                addDirectoriesOfPath(path, namedInputDirList, inputDirMap);
+                addDirectoriesOfPath(path, namedInputDirList, inputDirList);
                 inputPath = path;
                 updateInputField();
             }
@@ -260,33 +328,44 @@ public class MainFrame extends Application {
         }
     }
 
-    private void addDirectoriesOfPath(File path, ObservableList<String> namedDirList, ObservableMap<String, File> dirMap) {
+    private void checkDirectoryCorrect(File path) {
         if (path == null) throw new IllegalArgumentException("[ERROR][UPDATING] Path was null.");
         if (!path.isDirectory()) throw new IllegalArgumentException("[ERROR][UPDATING] Path is not a directory.");
+    }
+
+    private void addDirectoriesOfPath(File path, ObservableList<String> namedDirList, ObservableSet<ModFile> dirList) {
+        checkDirectoryCorrect(path);
         File[] files = path.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            File dir = files[i];
+        for (File dir : files) {
             if (dir.isDirectory()) {
-                File[] subFiles = dir.listFiles((subDir, name) -> name.toLowerCase().endsWith(".pak"));
-                if (subFiles != null && subFiles.length == 1) {
-                    String dirName = dir.getName();
-                    namedDirList.add(dirName);
-                    dirMap.put(dirName, dir);
+                String dirName = dir.getName();
+                ModFile modFile;
+                try {
+                    modFile = new ModFile(dir, dirName);
+                } catch (ModFileGenerationException e) {
+                    continue;
                 }
+                namedDirList.add(dirName);
+                dirList.add(modFile);
             }
         }
     }
 
-    private void addFilesOfPath(File path, ObservableList<String> namedFileList, ObservableMap<String, File> fileMap) {
-        if (path == null) throw new IllegalArgumentException("[ERROR][UPDATING] Path was null.");
-        if (!path.isDirectory()) throw new IllegalArgumentException("[ERROR][UPDATING] Path is not a directory.");
+    private void addFilesOfPath(File path, ObservableList<String> namedFileList, ObservableSet<ModFile> fileMap) {
+        checkDirectoryCorrect(path);
         File[] subFiles = path.listFiles((subFile, name) -> name.toLowerCase().endsWith(".pak"));
         if (subFiles != null) {
             for (int i = 0; i < subFiles.length; i++) {
                 File file = subFiles[i];
                 String fileName = file.getName();
+                ModFile modFile;
+                try {
+                    modFile = new ModFile(file, fileName);
+                } catch (ModFileGenerationException e) {
+                    continue;
+                }
                 namedFileList.add(fileName);
-                fileMap.put(fileName, file);
+                fileMap.add(modFile);
             }
         }
     }
