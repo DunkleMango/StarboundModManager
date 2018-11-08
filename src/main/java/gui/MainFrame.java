@@ -14,9 +14,11 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import managers.checkboxes.InputCheckBoxManager;
@@ -33,6 +35,10 @@ import java.util.Optional;
 
 public class MainFrame extends Application {
 
+    private static final double FRAME_WIDTH = 500;
+    private static final double FRAME_HEIGHT = 400;
+    private static final double GRID_SIDE_PADDING = 25;
+    private static VBox buttonVBox = new VBox();
     private ObservableList<String> namedInputDirList = FXCollections.observableArrayList();
     private ObservableList<String> namedOutputFileList = FXCollections.observableArrayList();
     private ObservableSet<ModFile> inputDirList = FXCollections.observableSet();
@@ -53,7 +59,9 @@ public class MainFrame extends Application {
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
-        grid.setPadding(new Insets(25, 25, 25, 25));
+        grid.setPadding(new Insets(25, GRID_SIDE_PADDING, 25, GRID_SIDE_PADDING));
+
+        buttonVBox.setPrefWidth(FRAME_WIDTH / 2 - GRID_SIDE_PADDING);
 
         loadSettings();
         inputField = new TextField(inputPath.getAbsolutePath());
@@ -69,7 +77,7 @@ public class MainFrame extends Application {
 
         setupClearButton(grid);
 
-        Scene scene = new Scene(grid, 500, 400);
+        Scene scene = new Scene(grid, FRAME_WIDTH, FRAME_HEIGHT);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Starbound Mod Manager");
         primaryStage.setResizable(false);
@@ -83,6 +91,7 @@ public class MainFrame extends Application {
         transferAlert.setHeaderText("Do you wish to transfer the following files?");
 
         Button updateButton = new Button("Update all");
+        updateButton.setMinWidth(buttonVBox.getPrefWidth());
         updateButton.setOnAction(event -> {
             ArrayList<String> dirsOfFilesToTransfer = new ArrayList<>();
             System.out.println(inputDirList);
@@ -119,6 +128,7 @@ public class MainFrame extends Application {
         transferAlert.setHeaderText("Do you wish to transfer the following files?");
 
         Button transferButton = new Button("Transfer Selected");
+        transferButton.setMinWidth(buttonVBox.getPrefWidth());
         transferButton.setOnAction(event -> {
             ArrayList<String> dirsOfFilesToTransfer = new ArrayList<>();
             namedInputDirList.forEach(name -> {
@@ -172,6 +182,7 @@ public class MainFrame extends Application {
         clearAlert.setHeaderText("Do you wish to delete the following files?");
 
         Button clearButton = new Button("Delete selected");
+        clearButton.setMinWidth(buttonVBox.getPrefWidth());
         clearButton.setOnAction(event -> {
             ArrayList<String> filesToDelete = new ArrayList<>();
             namedOutputFileList.forEach(name -> {
@@ -270,6 +281,7 @@ public class MainFrame extends Application {
         if (outputPath.exists() && outputPath.isDirectory()) outputDirectoryChooser.setInitialDirectory(outputPath);
 
         Button chooseOutput = new Button("Choose output directory");
+        chooseOutput.setMinWidth(buttonVBox.getPrefWidth());
         chooseOutput.setOnAction(event -> {
             File path = outputDirectoryChooser.showDialog(primaryStage);
             if (path != null && path.isDirectory()) {
@@ -296,6 +308,7 @@ public class MainFrame extends Application {
         if (inputPath.exists() && inputPath.isDirectory()) inputDirectoryChooser.setInitialDirectory(inputPath);
 
         Button chooseInput = new Button("Choose input directory");
+        chooseInput.setMinWidth(buttonVBox.getPrefWidth());
         chooseInput.setOnAction(event -> {
             File path = inputDirectoryChooser.showDialog(primaryStage);
             if (path != null && path.isDirectory()) {
