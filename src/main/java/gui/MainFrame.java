@@ -13,6 +13,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -20,23 +21,22 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import managers.checkboxes.InputCheckBoxManager;
 import managers.checkboxes.OutputCheckBoxManager;
 import managers.settings.SettingsManager;
+import transfer.FileTransferTask;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 
 public class MainFrame extends Application {
 
     private static final double FRAME_WIDTH = 500;
-    private static final double FRAME_HEIGHT = 400;
+    private static final double FRAME_HEIGHT = 500;
     private static final double GRID_SIDE_PADDING = 25;
     private static VBox buttonVBox = new VBox();
     private ObservableList<String> namedInputDirList = FXCollections.observableArrayList();
@@ -72,8 +72,8 @@ public class MainFrame extends Application {
         setupInputPanels(grid, primaryStage);
         setupOutputPanels(grid, primaryStage);
 
-        setupTransferButton(grid);
-        setupUpdateButton(grid);
+        setupTransferButton(grid, primaryStage);
+        setupUpdateButton(grid, primaryStage);
 
         setupClearButton(grid);
 
@@ -85,7 +85,7 @@ public class MainFrame extends Application {
         primaryStage.show();
     }
 
-    private void setupUpdateButton(GridPane grid) {
+    private void setupUpdateButton(GridPane grid, Stage primaryStage) {
         Alert transferAlert = new Alert(Alert.AlertType.CONFIRMATION);
         transferAlert.setTitle("Confirmation of transfer");
         transferAlert.setHeaderText("Do you wish to transfer the following files?");
@@ -94,8 +94,8 @@ public class MainFrame extends Application {
         updateButton.setMinWidth(buttonVBox.getPrefWidth());
         updateButton.setOnAction(event -> {
             ArrayList<String> dirsOfFilesToTransfer = new ArrayList<>();
-            System.out.println(inputDirList);
-            System.out.println(outputFileList);
+
+
             for (ModFile inputModFile : inputDirList) {
                 ModFile outputModFile = null;
                 try {
@@ -104,16 +104,16 @@ public class MainFrame extends Application {
                     continue;
                 }
                 if (inputModFile != null && outputModFile != null && outputModFile.getName().equals(inputModFile.getName() + ".pak")
-                    && inputModFile.isNewerThan(outputModFile)) {
+                        && inputModFile.isNewerThan(outputModFile)) {
                     dirsOfFilesToTransfer.add(inputModFile.getName());
-                    System.out.println(inputModFile.getName());
+
                 }
             }
             if (!dirsOfFilesToTransfer.isEmpty()) {
                 transferAlert.setContentText(getFilesAsText(dirsOfFilesToTransfer, RepresentingType.INPUT));
                 Optional<ButtonType> result = transferAlert.showAndWait();
                 if (result.get() == ButtonType.OK) {
-                    transferFiles(dirsOfFilesToTransfer);
+                    transferFiles(dirsOfFilesToTransfer, primaryStage);
                     namedOutputFileList.clear();
                     addFilesOfPath(outputPath, namedOutputFileList, outputFileList);
                 }
@@ -122,7 +122,7 @@ public class MainFrame extends Application {
         grid.add(updateButton, 1, 4);
     }
 
-    private void setupTransferButton(GridPane grid) {
+    private void setupTransferButton(GridPane grid, Stage primaryStage) {
         Alert transferAlert = new Alert(Alert.AlertType.CONFIRMATION);
         transferAlert.setTitle("Confirmation of transfer");
         transferAlert.setHeaderText("Do you wish to transfer the following files?");
@@ -141,7 +141,7 @@ public class MainFrame extends Application {
                 transferAlert.setContentText(getFilesAsText(dirsOfFilesToTransfer, RepresentingType.INPUT));
                 Optional<ButtonType> result = transferAlert.showAndWait();
                 if (result.get() == ButtonType.OK) {
-                    transferFiles(dirsOfFilesToTransfer);
+                    transferFiles(dirsOfFilesToTransfer, primaryStage);
                     namedOutputFileList.clear();
                     addFilesOfPath(outputPath, namedOutputFileList, outputFileList);
                 }
@@ -150,7 +150,25 @@ public class MainFrame extends Application {
         grid.add(transferButton, 0, 4);
     }
 
-    private void transferFiles(ArrayList<String> dirsOfFilesToTransfer) {
+    private void transferFiles(ArrayList<String> dirsOfFilesToTransfer, Stage primaryStage) {
+        final Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.initOwner(primaryStage);
+        dialog.setTitle("File-transfer");
+
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(25, GRID_SIDE_PADDING, 25, GRID_SIDE_PADDING));
+        ProgressBar progressBar = new ProgressBar();
+        progressBar.setPrefWidth(300);
+
+        grid.add(new Text("Progress of transfer:"), 0, 0);
+
+        List<File> inputFiles = new ArrayList<>();
+        List<File> outputFiles = new ArrayList<>();
+
         for (String name : dirsOfFilesToTransfer) {
             File inputDir;
             try {
@@ -162,18 +180,26 @@ public class MainFrame extends Application {
                 File[] subFiles = inputDir.listFiles((subDir, subName) -> subName.toLowerCase().endsWith(".pak"));
                 if (subFiles != null && subFiles.length == 1) {
                     File inputFile = subFiles[0];
-                    File outputFile = new File(outputPath.getAbsolutePath() + "\\" +  name + ".pak");
+                    File outputFile = new File(outputPath.getAbsolutePath() + "\\" + name + ".pak");
                     if (inputFile.exists() && outputPath.exists()) {
-                        try {
-                            Files.deleteIfExists(outputFile.toPath());
-                            Files.copy(inputFile.toPath(), outputFile.toPath());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        inputFiles.add(inputFile);
+                        outputFiles.add(outputFile);
                     }
                 }
             }
         }
+
+
+        FileTransferTask fileTransferTask = new FileTransferTask(inputFiles, outputFiles);
+
+        fileTransferTask.transferFiles(progressBar);
+
+        grid.add(progressBar, 0, 1);
+
+        Scene dialogScene = new Scene(grid, 300, 100);
+        dialog.setScene(dialogScene);
+        dialog.setResizable(false);
+        dialog.show();
     }
 
     private void setupClearButton(GridPane grid) {
@@ -207,7 +233,7 @@ public class MainFrame extends Application {
                 }
             }
         });
-        grid.add(clearButton, 1,5);
+        grid.add(clearButton, 1, 5);
     }
 
     private String getFilesAsText(ArrayList<String> files, RepresentingType type) {
@@ -264,18 +290,18 @@ public class MainFrame extends Application {
         String inputPathString = settingsManager.getSetting(SettingsManager.INPUT_PATH);
         if (inputPathString != null) inputPath = new File(inputPathString);
         String outputPathString = settingsManager.getSetting(SettingsManager.OUTPUT_PATH);
-        if (outputPathString != null)  outputPath = new File(outputPathString);
+        if (outputPathString != null) outputPath = new File(outputPathString);
     }
 
     private void setupOutputPanels(GridPane grid, Stage primaryStage) {
         Text rightTitle = new Text("Mods directory");
         rightTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
-        grid.add(rightTitle, 1,0);
+        grid.add(rightTitle, 1, 0);
 
         outputListView.setCellFactory((view) -> new CheckBoxCell(RepresentingType.OUTPUT));
         grid.add(outputListView, 1, 1);
 
-        grid.add(outputField, 1,2);
+        grid.add(outputField, 1, 2);
 
         DirectoryChooser outputDirectoryChooser = new DirectoryChooser();
         if (outputPath.exists() && outputPath.isDirectory()) outputDirectoryChooser.setInitialDirectory(outputPath);
@@ -302,7 +328,7 @@ public class MainFrame extends Application {
         inputListView.setCellFactory((view) -> new CheckBoxCell(RepresentingType.INPUT));
         grid.add(inputListView, 0, 1);
 
-        grid.add(inputField, 0,2);
+        grid.add(inputField, 0, 2);
 
         DirectoryChooser inputDirectoryChooser = new DirectoryChooser();
         if (inputPath.exists() && inputPath.isDirectory()) inputDirectoryChooser.setInitialDirectory(inputPath);
