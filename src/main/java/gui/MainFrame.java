@@ -203,6 +203,15 @@ public class MainFrame extends Application {
         dialog.setResizable(false);
         dialog.show();
 
+        updateView();
+    }
+
+    private void updateView() {
+        namedInputDirList.clear();
+        addDirectoriesOfPath(inputPath, namedInputDirList, inputDirList);
+
+        namedOutputFileList.clear();
+        addFilesOfPath(outputPath, namedOutputFileList, outputFileList);
     }
 
     private void setupClearButton(GridPane grid) {
