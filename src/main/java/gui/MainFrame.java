@@ -95,7 +95,6 @@ public class MainFrame extends Application {
         updateButton.setOnAction(event -> {
             ArrayList<String> dirsOfFilesToTransfer = new ArrayList<>();
 
-
             for (ModFile inputModFile : inputDirList) {
                 ModFile outputModFile = null;
                 try {
@@ -106,7 +105,6 @@ public class MainFrame extends Application {
                 if (inputModFile != null && outputModFile != null && outputModFile.getName().equals(inputModFile.getName() + ".pak")
                         && inputModFile.isNewerThan(outputModFile)) {
                     dirsOfFilesToTransfer.add(inputModFile.getName());
-
                 }
             }
             if (!dirsOfFilesToTransfer.isEmpty()) {
@@ -192,14 +190,19 @@ public class MainFrame extends Application {
 
         FileTransferTask fileTransferTask = new FileTransferTask(inputFiles, outputFiles);
 
+        progressBar.progressProperty().addListener((obs, ov, nv) -> {
+            if (nv.doubleValue() == 1.0) {
+                dialog.hide();
+            }
+        });
         fileTransferTask.transferFiles(progressBar);
-
         grid.add(progressBar, 0, 1);
 
         Scene dialogScene = new Scene(grid, 300, 100);
         dialog.setScene(dialogScene);
         dialog.setResizable(false);
         dialog.show();
+
     }
 
     private void setupClearButton(GridPane grid) {
