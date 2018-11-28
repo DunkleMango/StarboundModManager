@@ -7,8 +7,8 @@ This application is in no way associated with Starbound and their creators Chuck
 It was only created by [DunkleMango](https://github.com/DunkleMango) for the purpose of simplifying the process of managing mods for the game.  
 
 ## Sections
-[Setting up the application (v1.1.*)](#setting-up-the-application-v11*)  
-[Using the application correctly (v1.1.*)](#using-the-application-correctly-v11*)  
+[Setting up the application (v1.1.*)](#setting-up-the-application-v11)  
+[Using the application correctly (v1.1.*)](#using-the-application-correctly-v11)  
 
 ## Setting up the application (v1.1.*)
 Start by downloading the StarboundModManager.jar file or compile the code yourself.  
