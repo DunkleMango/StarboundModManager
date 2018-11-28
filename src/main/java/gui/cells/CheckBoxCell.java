@@ -1,5 +1,6 @@
 package gui.cells;
 
+import managers.checkboxes.CheckBoxManager;
 import managers.checkboxes.InputCheckBoxManager;
 import managers.checkboxes.OutputCheckBoxManager;
 import javafx.scene.control.CheckBox;
@@ -11,23 +12,33 @@ import javafx.scene.layout.Priority;
 
 public class CheckBoxCell extends ListCell<String> {
 
+    private final RepresentingType type;
     private HBox hBox = new HBox();
     private Label label = new Label("(empty)");
     private Pane pane = new Pane();
     private CheckBox checkBox = new CheckBox();
+    private CheckBoxManager checkBoxManager;
     String lastItem;
 
     public CheckBoxCell(RepresentingType type) {
         super();
+        this.type = type;
+
+        init();
+    }
+
+    private void init() {
+        switch (type) {
+            case INPUT:
+                checkBoxManager = InputCheckBoxManager.getInstance();
+                break;
+            case OUTPUT:
+                checkBoxManager = OutputCheckBoxManager.getInstance();
+                break;
+        }
+
         checkBox.setOnAction(event -> {
-            switch (type) {
-                case INPUT:
-                    InputCheckBoxManager.getInstance().put(getItem(), getChecked());
-                    break;
-                case OUTPUT:
-                    OutputCheckBoxManager.getInstance().put(getItem(), getChecked());
-                    break;
-            }
+            checkBoxManager.put(getItem(), getChecked());
         });
         hBox.getChildren().addAll(label, pane, checkBox);
         HBox.setHgrow(pane, Priority.ALWAYS);
@@ -45,7 +56,8 @@ public class CheckBoxCell extends ListCell<String> {
             label.setText(item!=null ? item : "<null>");
             setGraphic(hBox);
         }
-        checkBox.setSelected(false);
+        Boolean isSelected = checkBoxManager.get(item);
+        checkBox.setSelected(isSelected != null ? isSelected : false);
     }
 
     public boolean getChecked() {
