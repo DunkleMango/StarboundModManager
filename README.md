@@ -45,6 +45,9 @@ Once you finished, you are ready to use the StarboundModManager!
 Don't worry about having to repeat this process. All changes will be automatically saved in your home directory in a small config file! :)
 
 ## Using the application correctly (v1.1.*)
+
+![Application started](https://i.imgur.com/Kg3pFur.png)  
+
 ### Transfering mods
 If you want to transfer mods from your Steam-workshop directory to your Starbound mods folder, you can follow this quick guide.  
 
@@ -53,17 +56,11 @@ Then press the button **[Transfer selected]** and confirm the operation.
 
 This process will override any existing files with the same name in your mods directory (the list of mods on the right).  
 
-![Application started](https://i.imgur.com/Kg3pFur.png)  
-
 ### Updating all mods
 To update all mods that are currently in your Starbound mods directory, simply click the button **[Update all]**
 
-![Application started](https://i.imgur.com/Kg3pFur.png)  
-
 ### Deleting mods
 On the other hand, if you want to just delete a few mods from the mods directory of Starbound, you will have to select the mods on the right.  
-
-![Application started](https://i.imgur.com/Kg3pFur.png)  
 
 Then press the button **[Delete selected]** check **carefully**, if those are the right files to delete and confirm the operation.  
 
