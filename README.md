@@ -1,5 +1,5 @@
 # StarboundModManager
-Allows to manage mods from the game Starbound easily! (works with Steam)
+Allows to manage mods from the game Starbound with ease! (works with Steam)
 
 The StarboundModManager enables the user to manage their mods from the game [Starbound](http://playstarbound.com/).  
 
