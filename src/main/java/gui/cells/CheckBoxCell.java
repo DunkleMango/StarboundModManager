@@ -1,14 +1,14 @@
 package gui.cells;
 
-import managers.checkboxes.CheckBoxManager;
-import managers.checkboxes.InputCheckBoxManager;
-import managers.checkboxes.OutputCheckBoxManager;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import managers.checkboxes.CheckBoxManager;
+import managers.checkboxes.InputCheckBoxManager;
+import managers.checkboxes.OutputCheckBoxManager;
 
 public class CheckBoxCell extends ListCell<String> {
 

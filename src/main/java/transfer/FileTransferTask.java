@@ -1,7 +1,5 @@
 package transfer;
 
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.scene.control.ProgressBar;
 
