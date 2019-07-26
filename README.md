@@ -7,13 +7,13 @@ This application is in no way associated with Starbound and their creators Chuck
 It was only created by [DunkleMango](https://github.com/DunkleMango) for the purpose of simplifying the process of managing mods for the game.  
 
 ## Sections
-+ [Setting up the application (v1.1.*)](#setting-up-the-application-v11)  
-+ [Using the application correctly (v1.1.*)](#using-the-application-correctly-v11)  
++ [Setting up the application (v1.2.*)](#setting-up-the-application-v12)  
++ [Using the application correctly (v1.2.*)](#using-the-application-correctly-v12)  
   + [Transfering mods](#transfering-mods)  
   + [Updating all mods](#updating-all-mods)  
   + [Deleting mods](#deleting-mods)  
 
-## Setting up the application (v1.1.*)
+## Setting up the application (v1.2.*)
 Start by downloading the StarboundModManager.jar file or compile the code yourself.  
 Next, run the jar file with Java.  
 
@@ -44,7 +44,7 @@ A new window opens. In this case, we want to select the mods folder of Starbound
 Once you finished, you are ready to use the StarboundModManager!  
 Don't worry about having to repeat this process. All changes will be automatically saved in your home directory in a small config file! :)
 
-## Using the application correctly (v1.1.*)
+## Using the application correctly (v1.2.*)
 
 ![Application started](https://i.imgur.com/Kg3pFur.png)  
 
