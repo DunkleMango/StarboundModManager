@@ -1,6 +1,6 @@
-package data;
+package com.github.dunklemango.starboundmodmanager.data;
 
-import exceptions.ModFileGenerationException;
+import com.github.dunklemango.starboundmodmanager.exceptions.ModFileGenerationException;
 
 import java.io.File;
 import java.util.Date;

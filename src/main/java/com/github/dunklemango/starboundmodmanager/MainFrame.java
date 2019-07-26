@@ -1,10 +1,13 @@
-package gui;
+package com.github.dunklemango.starboundmodmanager;
 
-import data.ModFile;
-import exceptions.ModFileGenerationException;
-import exceptions.ModFileNotFoundException;
-import gui.cells.CheckBoxCell;
-import gui.cells.RepresentingType;
+import com.github.dunklemango.starboundmodmanager.data.ModFile;
+import com.github.dunklemango.starboundmodmanager.exceptions.ModFileGenerationException;
+import com.github.dunklemango.starboundmodmanager.exceptions.ModFileNotFoundException;
+import com.github.dunklemango.starboundmodmanager.gui.cells.CheckBoxCell;
+import com.github.dunklemango.starboundmodmanager.gui.cells.RepresentingType;
+import com.github.dunklemango.starboundmodmanager.managers.checkboxes.InputCheckBoxManager;
+import com.github.dunklemango.starboundmodmanager.managers.checkboxes.OutputCheckBoxManager;
+import com.github.dunklemango.starboundmodmanager.managers.settings.SettingsManager;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,10 +24,7 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import managers.checkboxes.InputCheckBoxManager;
-import managers.checkboxes.OutputCheckBoxManager;
-import managers.settings.SettingsManager;
-import transfer.FileTransferTask;
+import com.github.dunklemango.starboundmodmanager.transfer.FileTransferTask;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -86,8 +86,8 @@ public class MainFrame extends Application {
 
     private void setupUpdateButton(GridPane grid, Stage primaryStage) {
         Alert transferAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        transferAlert.setTitle("Confirmation of transfer");
-        transferAlert.setHeaderText("Do you wish to transfer the following files?");
+        transferAlert.setTitle("Confirmation of com.github.dunklemango.transfer");
+        transferAlert.setHeaderText("Do you wish to com.github.dunklemango.transfer the following files?");
 
         Button updateButton = new Button("Update all");
         updateButton.setMinWidth(buttonVBox.getPrefWidth());
@@ -121,8 +121,8 @@ public class MainFrame extends Application {
 
     private void setupTransferButton(GridPane grid, Stage primaryStage) {
         Alert transferAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        transferAlert.setTitle("Confirmation of transfer");
-        transferAlert.setHeaderText("Do you wish to transfer the following files?");
+        transferAlert.setTitle("Confirmation of com.github.dunklemango.transfer");
+        transferAlert.setHeaderText("Do you wish to com.github.dunklemango.transfer the following files?");
 
         Button transferButton = new Button("Transfer Selected");
         transferButton.setMinWidth(buttonVBox.getPrefWidth());
@@ -151,7 +151,7 @@ public class MainFrame extends Application {
         final Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(primaryStage);
-        dialog.setTitle("File-transfer");
+        dialog.setTitle("File-com.github.dunklemango.transfer");
 
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -161,7 +161,7 @@ public class MainFrame extends Application {
         ProgressBar progressBar = new ProgressBar();
         progressBar.setPrefWidth(300);
 
-        grid.add(new Text("Progress of transfer:"), 0, 0);
+        grid.add(new Text("Progress of com.github.dunklemango.transfer:"), 0, 0);
 
         List<File> inputFiles = new ArrayList<>();
         List<File> outputFiles = new ArrayList<>();

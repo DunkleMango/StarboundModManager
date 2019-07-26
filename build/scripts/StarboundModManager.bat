@@ -63,10 +63,10 @@ set CMD_LINE_ARGS=%*
 :execute
 @rem Setup the command line
 
-set CLASSPATH=%APP_HOME%\lib\StarboundModManager-1.2.jar;%APP_HOME%\lib\javafx-fxml-12-win.jar;%APP_HOME%\lib\javafx-controls-12-win.jar;%APP_HOME%\lib\javafx-controls-12.jar;%APP_HOME%\lib\javafx-graphics-12-win.jar;%APP_HOME%\lib\javafx-graphics-12.jar;%APP_HOME%\lib\javafx-base-12-win.jar;%APP_HOME%\lib\javafx-base-12.jar
+set CLASSPATH=%APP_HOME%\lib\StarboundModManager.jar;%APP_HOME%\lib\javafx-fxml-12-win.jar;%APP_HOME%\lib\javafx-controls-12-win.jar;%APP_HOME%\lib\javafx-controls-12.jar;%APP_HOME%\lib\javafx-graphics-12-win.jar;%APP_HOME%\lib\javafx-graphics-12.jar;%APP_HOME%\lib\javafx-base-12-win.jar;%APP_HOME%\lib\javafx-base-12.jar
 
 @rem Execute StarboundModManager
-"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %STARBOUND_MOD_MANAGER_OPTS%  -classpath "%CLASSPATH%" gui.MainFrame %CMD_LINE_ARGS%
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %STARBOUND_MOD_MANAGER_OPTS%  -classpath "%CLASSPATH%" com.github.dunklemango.starboundmodmanager.MainFrame %CMD_LINE_ARGS%
 
 :end
 @rem End local scope for the variables with windows NT shell

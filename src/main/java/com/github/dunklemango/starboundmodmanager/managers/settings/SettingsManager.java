@@ -1,4 +1,4 @@
-package managers.settings;
+package com.github.dunklemango.starboundmodmanager.managers.settings;
 
 import java.io.File;
 import java.io.FileInputStream;

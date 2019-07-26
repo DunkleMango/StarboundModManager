@@ -1,4 +1,4 @@
-package transfer;
+package com.github.dunklemango.starboundmodmanager.transfer;
 
 import javafx.concurrent.Task;
 import javafx.scene.control.ProgressBar;

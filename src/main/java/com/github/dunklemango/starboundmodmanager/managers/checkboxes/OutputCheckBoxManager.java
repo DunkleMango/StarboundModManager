@@ -1,4 +1,4 @@
-package managers.checkboxes;
+package com.github.dunklemango.starboundmodmanager.managers.checkboxes;
 
 public final class OutputCheckBoxManager extends CheckBoxManager {
 
