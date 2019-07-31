@@ -1,0 +1,73 @@
+@import "style.css";
+
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: var(--brightness-medium-color) var(--main-bg-color);
+  -ms-overflow-style: none;  // IE 10+
+}
+
+:root::-webkit-scrollbar {
+  display: none;
+}
+
+.commits {
+  width: 550px;
+  margin: auto;
+  border-left: 4px solid white;
+}
+
+.commitGroupDate {
+  text-align: left;
+  margin-left: 20px;
+}
+
+.commitGroupDateSeparator {
+  margin-top: 60px;
+}
+
+.commitGroupDate::before {
+  content: '';
+  display: inline-block;
+  position: relative;
+  height: 16px;
+  width: 16px;
+  border-radius: 50px;
+  background-color: var(--main-bg-color);
+  box-shadow: 0px 0px 0px 4px white;
+  left: -30px;
+}
+
+.commitWrapper {
+  border: 2px solid var(--brightness-low-color);
+  border-radius: 5px;
+  margin: 10px 20px;
+}
+
+.commitMessage {
+  text-align: left;
+  margin-left: 20px;
+}
+
+.commitUserWrapper {
+  display: flex;
+  color: var(--brightness-medium-color);
+}
+
+.commitUserImgWrapper {
+  height: 30px;
+  min-width: 36px;
+  margin: auto 10px auto 10px;
+}
+
+.commitUserImg {
+  height: 30px;
+  width: 30px;
+  align-self: flex-start;
+  border-radius: 5px;
+  box-shadow: 0px 0px 0px 1px var(--brightness-medium-color);
+}
+
+.commitUserName {
+  align-self: flex-end;
+  margin: auto 20px auto 0px;
+}
