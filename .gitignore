@@ -11,6 +11,12 @@ out/
 # BlueJ files
 *.ctxt
 
+# VSCode Folder
+.vscode
+
+#Prettier
+.prettierrc.json
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
