@@ -1,8 +1,8 @@
 package com.github.dunklemango.starboundmodmanager.gui.cells;
 
-import com.github.dunklemango.starboundmodmanager.managers.checkboxes.CheckBoxManager;
-import com.github.dunklemango.starboundmodmanager.managers.checkboxes.InputCheckBoxManager;
-import com.github.dunklemango.starboundmodmanager.managers.checkboxes.OutputCheckBoxManager;
+import com.github.dunklemango.starboundmodmanager.gui.checkboxes.CheckBoxManager;
+import com.github.dunklemango.starboundmodmanager.gui.checkboxes.InputCheckBoxManager;
+import com.github.dunklemango.starboundmodmanager.gui.checkboxes.OutputCheckBoxManager;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;

@@ -1,4 +1,4 @@
-package com.github.dunklemango.starboundmodmanager.managers.checkboxes;
+package com.github.dunklemango.starboundmodmanager.gui.checkboxes;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;

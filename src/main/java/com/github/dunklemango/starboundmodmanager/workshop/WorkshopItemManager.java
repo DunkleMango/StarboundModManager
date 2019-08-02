@@ -1,5 +1,7 @@
-package com.github.dunklemango.starboundmodmanager.connect;
+package com.github.dunklemango.starboundmodmanager.workshop;
 
+import com.github.dunklemango.starboundmodmanager.storage.SettingsManager;
+import com.github.dunklemango.starboundmodmanager.storage.WorkshopCacheManager;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -17,59 +19,56 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Loads data from Steam and extracts usable information.
  */
-public final class SteamWorkshopManager {
+public final class WorkshopItemManager {
     private static final String WORKSHOP_URI = "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/";
-    private static final String TITLE_NOT_FOUND = "[error: title not found]";
-    private static final Logger logger = LogManager.getLogger("SteamWorkshopManager");
+    private static final Logger logger = LogManager.getLogger("WorkshopItemManager");
 
-    private SteamWorkshopManager() {
+    private WorkshopItemManager() {
 
     }
 
-    public static List<String> getTitlesFromWorkshopIds(List<Integer> workshopIds) {
-        List<String> titles = new ArrayList<>();
-        workshopIds.forEach(id -> titles.add(TITLE_NOT_FOUND));
+    public static void loadWorkshopDataFromSteam(List<WorkshopItem> workshopItems) {
         try (CloseableHttpClient httpClient = initClient()) {
-            for (int i = 0; i < titles.size(); i++) {
-                titles.set(i, getTitleFromWorkshopId(httpClient, workshopIds.get(i)));
-            }
+            workshopItems.forEach(workshopItem -> {
+                logger.debug("retrieving data from server for workshopItem with id: {}", workshopItem.getId());
+                workshopItem.setData(loadWorkshopDataFromSteam(httpClient, workshopItem.getId()));
+                logger.debug("retrieved data for workshopItem: {}", workshopItem.toString());
+            });
         } finally {
-            return titles;
+            return;
         }
     }
 
-    public static String getTitleFromWorkshopId(int workshopId) {
-        String title = TITLE_NOT_FOUND;
+    public static void loadWorkshopDataFromSteam(WorkshopItem workshopItem) {
         try (CloseableHttpClient httpClient = initClient()) {
-            title = getTitleFromWorkshopId(httpClient, workshopId);
+            workshopItem.setData(loadWorkshopDataFromSteam(httpClient, workshopItem.getId()));
         } finally {
-            return title;
+            return;
         }
     }
 
-    private static String getTitleFromWorkshopId(CloseableHttpClient httpClient, int workshopId) {
-        String title = TITLE_NOT_FOUND;
+    private static JSONObject loadWorkshopDataFromSteam(CloseableHttpClient httpClient, int workshopId) {
+        JSONObject data = null;
         try {
             CloseableHttpResponse response = httpClient.execute(createRequestForWorkshopId(workshopId));
-
             HttpEntity entity = response.getEntity();
-            JSONObject jsonObject = getDataJsonFromString(EntityUtils.toString(entity));
-            title = jsonObject.getString("title");
-            EntityUtils.consume(entity);
 
+            data = getDataJsonFromString(EntityUtils.toString(entity));
+
+            EntityUtils.consume(entity);
             response.close();
         } catch (IOException e) {
             logger.error("unable to complete HTTP-POST request", e);
         } catch (JSONException e) {
             logger.error("HTTP-POST response received but unable to convert to JSON", e);
         } finally {
-            return title;
+            return data;
         }
     }
 

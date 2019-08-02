@@ -1,13 +1,17 @@
 package com.github.dunklemango.starboundmodmanager;
 
+import com.github.dunklemango.starboundmodmanager.storage.WorkshopCacheManager;
+import com.github.dunklemango.starboundmodmanager.workshop.WorkshopItemManager;
 import com.github.dunklemango.starboundmodmanager.data.ModFile;
 import com.github.dunklemango.starboundmodmanager.exceptions.ModFileGenerationException;
 import com.github.dunklemango.starboundmodmanager.exceptions.ModFileNotFoundException;
 import com.github.dunklemango.starboundmodmanager.gui.cells.CheckBoxCell;
 import com.github.dunklemango.starboundmodmanager.gui.cells.RepresentingType;
-import com.github.dunklemango.starboundmodmanager.managers.checkboxes.InputCheckBoxManager;
-import com.github.dunklemango.starboundmodmanager.managers.checkboxes.OutputCheckBoxManager;
-import com.github.dunklemango.starboundmodmanager.managers.settings.SettingsManager;
+import com.github.dunklemango.starboundmodmanager.gui.checkboxes.InputCheckBoxManager;
+import com.github.dunklemango.starboundmodmanager.gui.checkboxes.OutputCheckBoxManager;
+import com.github.dunklemango.starboundmodmanager.storage.SettingsManager;
+import com.github.dunklemango.starboundmodmanager.transfer.FileTransferTask;
+import com.github.dunklemango.starboundmodmanager.workshop.WorkshopItem;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,19 +28,19 @@ import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import com.github.dunklemango.starboundmodmanager.transfer.FileTransferTask;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MainFrame extends Application {
-
+    private static final Logger logger = LogManager.getLogger("Application");
     private static final double FRAME_WIDTH = 500;
     private static final double FRAME_HEIGHT = 500;
     private static final double GRID_SIDE_PADDING = 25;
+    private static final String MOD_FILE_EXTENSION = ".pak";
     private static VBox buttonVBox = new VBox();
     private ObservableList<String> namedInputDirList = FXCollections.observableArrayList();
     private ObservableList<String> namedOutputFileList = FXCollections.observableArrayList();
@@ -63,6 +67,10 @@ public class MainFrame extends Application {
         buttonVBox.setPrefWidth(FRAME_WIDTH / 2 - GRID_SIDE_PADDING);
 
         loadSettings();
+        logger.debug("settings loaded");
+        loadCachedWorkshopItems();
+        logger.debug("workshop-item-cache loaded");
+
         inputField = new TextField(inputPath.getAbsolutePath());
         outputField = new TextField(outputPath.getAbsolutePath());
         if (inputPath.exists()) addDirectoriesOfPath(inputPath, namedInputDirList, inputDirList);
@@ -80,14 +88,18 @@ public class MainFrame extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle("Starbound Mod Manager");
         primaryStage.setResizable(false);
-        primaryStage.setOnCloseRequest(event -> saveSettings());
+        primaryStage.setOnCloseRequest(event -> {
+            saveSettings();
+            saveCachedWorkshopItems();
+        });
+        updateView();
         primaryStage.show();
     }
 
     private void setupUpdateButton(GridPane grid, Stage primaryStage) {
         Alert transferAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        transferAlert.setTitle("Confirmation of com.github.dunklemango.transfer");
-        transferAlert.setHeaderText("Do you wish to com.github.dunklemango.transfer the following files?");
+        transferAlert.setTitle("Confirmation of transfer");
+        transferAlert.setHeaderText("Do you wish to transfer the following files?");
 
         Button updateButton = new Button("Update all");
         updateButton.setMinWidth(buttonVBox.getPrefWidth());
@@ -121,8 +133,8 @@ public class MainFrame extends Application {
 
     private void setupTransferButton(GridPane grid, Stage primaryStage) {
         Alert transferAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        transferAlert.setTitle("Confirmation of com.github.dunklemango.transfer");
-        transferAlert.setHeaderText("Do you wish to com.github.dunklemango.transfer the following files?");
+        transferAlert.setTitle("Confirmation of transfer");
+        transferAlert.setHeaderText("Do you wish to transfer the following files?");
 
         Button transferButton = new Button("Transfer Selected");
         transferButton.setMinWidth(buttonVBox.getPrefWidth());
@@ -151,7 +163,7 @@ public class MainFrame extends Application {
         final Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.initOwner(primaryStage);
-        dialog.setTitle("File-com.github.dunklemango.transfer");
+        dialog.setTitle("File-transfer");
 
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -161,7 +173,7 @@ public class MainFrame extends Application {
         ProgressBar progressBar = new ProgressBar();
         progressBar.setPrefWidth(300);
 
-        grid.add(new Text("Progress of com.github.dunklemango.transfer:"), 0, 0);
+        grid.add(new Text("Progress of transfer:"), 0, 0);
 
         List<File> inputFiles = new ArrayList<>();
         List<File> outputFiles = new ArrayList<>();
@@ -207,10 +219,10 @@ public class MainFrame extends Application {
 
     private void updateView() {
         namedInputDirList.clear();
-        addDirectoriesOfPath(inputPath, namedInputDirList, inputDirList);
+        if (inputPath.exists() && inputPath.isDirectory()) addDirectoriesOfPath(inputPath, namedInputDirList, inputDirList);
 
         namedOutputFileList.clear();
-        addFilesOfPath(outputPath, namedOutputFileList, outputFileList);
+        if (outputPath.exists() && outputPath.isFile()) addFilesOfPath(outputPath, namedOutputFileList, outputFileList);
     }
 
     private void setupClearButton(GridPane grid) {
@@ -286,22 +298,27 @@ public class MainFrame extends Application {
 
     private void saveSettings() {
         SettingsManager settingsManager = SettingsManager.getInstance();
-        String settingsInput = settingsManager.getSetting(SettingsManager.INPUT_PATH);
-        String settingsOutput = settingsManager.getSetting(SettingsManager.OUTPUT_PATH);
-        if (settingsInput == null || settingsOutput == null || !settingsInput.equals(inputPath.getAbsolutePath())
-                || settingsOutput.equals(outputPath.getAbsolutePath())) {
-            settingsManager.setSetting(SettingsManager.INPUT_PATH, inputPath.getAbsolutePath());
-            settingsManager.setSetting(SettingsManager.OUTPUT_PATH, outputPath.getAbsolutePath());
-            settingsManager.saveSettings();
-        }
+        settingsManager.setSetting(SettingsManager.INPUT_PATH, inputPath.getAbsolutePath());
+        settingsManager.setSetting(SettingsManager.OUTPUT_PATH, outputPath.getAbsolutePath());
+        settingsManager.saveSettings();
+    }
+
+    private void saveCachedWorkshopItems() {
+        WorkshopCacheManager manager = WorkshopCacheManager.getInstance();
+        manager.saveData();
     }
 
     private void loadSettings() {
         SettingsManager settingsManager = SettingsManager.getInstance();
         String inputPathString = settingsManager.getSetting(SettingsManager.INPUT_PATH);
-        if (inputPathString != null) inputPath = new File(inputPathString);
+        if (inputPathString != null) this.inputPath = new File(inputPathString);
         String outputPathString = settingsManager.getSetting(SettingsManager.OUTPUT_PATH);
-        if (outputPathString != null) outputPath = new File(outputPathString);
+        if (outputPathString != null) this.outputPath = new File(outputPathString);
+    }
+
+    private void loadCachedWorkshopItems() {
+        WorkshopCacheManager manager = WorkshopCacheManager.getInstance();
+        manager.loadData();
     }
 
     private void setupOutputPanels(GridPane grid, Stage primaryStage) {
@@ -379,13 +396,15 @@ public class MainFrame extends Application {
     }
 
     private void checkDirectoryCorrect(File path) {
-        if (path == null) throw new IllegalArgumentException("[ERROR][UPDATING] Path was null.");
-        if (!path.isDirectory()) throw new IllegalArgumentException("[ERROR][UPDATING] Path is not a directory.");
+        if (path == null) throw new IllegalArgumentException("Path was null.");
+        if (!path.isDirectory()) throw new IllegalArgumentException("Path is not a directory.");
     }
 
-    private void addDirectoriesOfPath(File path, ObservableList<String> namedDirList, ObservableSet<ModFile> dirList) {
+    private void addDirectoriesOfPath(File path, ObservableList<String> namedDirList, ObservableSet<ModFile> dirSet) {
+        logger.debug("adding directories of path {}", path);
         checkDirectoryCorrect(path);
         File[] files = path.listFiles();
+        List<Integer> workshopIds = new ArrayList<>();
         for (File dir : files) {
             if (dir.isDirectory()) {
                 String dirName = dir.getName();
@@ -395,15 +414,35 @@ public class MainFrame extends Application {
                 } catch (ModFileGenerationException e) {
                     continue;
                 }
-                namedDirList.add(dirName);
-                dirList.add(modFile);
+                workshopIds.add(Integer.valueOf(dirName));
+                dirSet.add(modFile);
             }
         }
+
+        WorkshopCacheManager manager = WorkshopCacheManager.getInstance();
+        logger.debug("all workshopIds: {}", workshopIds);
+        logger.debug("cached workshopIds: {}", manager.getCachedIds());
+        List<Integer> workshopIdsToRetrieve = new ArrayList<>(workshopIds);
+        workshopIdsToRetrieve.removeIf(id -> manager.containsKey(id));
+        logger.debug("new workshopIds: {}", workshopIdsToRetrieve);
+
+        List<WorkshopItem> workshopItemsToRetrieve = new ArrayList<>();
+        workshopIdsToRetrieve.forEach(id -> workshopItemsToRetrieve.add(new WorkshopItem(id)));
+
+        if (!workshopIdsToRetrieve.isEmpty()) {
+            WorkshopItemManager.loadWorkshopDataFromSteam(workshopItemsToRetrieve);
+            manager.putAll(workshopItemsToRetrieve);
+        }
+
+        workshopIds.forEach(id -> namedDirList.add(manager.get(id).getTitle()));
+        logger.debug("names of workshopItems: {}", namedDirList);
     }
 
-    private void addFilesOfPath(File path, ObservableList<String> namedFileList, ObservableSet<ModFile> fileMap) {
+    private void addFilesOfPath(File path, ObservableList<String> namedFileList, ObservableSet<ModFile> fileSet) {
+        logger.debug("adding files of path {}", path);
         checkDirectoryCorrect(path);
-        File[] subFiles = path.listFiles((subFile, name) -> name.toLowerCase().endsWith(".pak"));
+        File[] subFiles = path.listFiles((subFile, name) -> name.toLowerCase().endsWith(MOD_FILE_EXTENSION));
+        List<Integer> workshopIds = new ArrayList<>();
         if (subFiles != null) {
             for (int i = 0; i < subFiles.length; i++) {
                 File file = subFiles[i];
@@ -414,10 +453,28 @@ public class MainFrame extends Application {
                 } catch (ModFileGenerationException e) {
                     continue;
                 }
-                namedFileList.add(fileName);
-                fileMap.add(modFile);
+                workshopIds.add(Integer.valueOf(fileName.replace(MOD_FILE_EXTENSION, "")));
+                fileSet.add(modFile);
             }
         }
+
+        WorkshopCacheManager manager = WorkshopCacheManager.getInstance();
+        logger.debug("all workshopIds: {}", workshopIds);
+        logger.debug("cached workshopIds: {}", manager.getCachedIds());
+        List<Integer> workshopIdsToRetrieve = new ArrayList<>(workshopIds);
+        workshopIdsToRetrieve.removeIf(id -> manager.containsKey(id));
+        logger.debug("new workshopIds: {}", workshopIdsToRetrieve);
+
+        List<WorkshopItem> workshopItemsToRetrieve = new ArrayList<>();
+        workshopIdsToRetrieve.forEach(id -> workshopItemsToRetrieve.add(new WorkshopItem(id)));
+
+        if (!workshopIdsToRetrieve.isEmpty()) {
+            WorkshopItemManager.loadWorkshopDataFromSteam(workshopItemsToRetrieve);
+            manager.putAll(workshopItemsToRetrieve);
+        }
+
+        workshopIds.forEach(id -> namedFileList.add(manager.get(id).getTitle()));
+        logger.debug("names of workshopItems: {}", namedFileList);
     }
 
 }
