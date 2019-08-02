@@ -1,5 +1,5 @@
 :root {
-  --main-bg-color: #20202f;
+  --main-bg-color: #343a40;
   --main-font-family: 'Raleway', sans-serif;
   --header-font-family: 'Lato', sans-serif;
   --main-font-size: 1em;
@@ -19,7 +19,9 @@ body {
   line-height: 1.6;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-family: var(--header-font-family);
 }
 
@@ -116,7 +118,7 @@ a.navLink {
   box-shadow: inset 0px 0px 0px 1px var(--accent-color);
   border-radius: 50px;
   color: white;
-  transition: .4s ease;
+  transition: 0.4s ease;
 }
 
 a.navLink:hover {
@@ -128,7 +130,8 @@ a.navLink::after {
   content: none;
 }
 
-section, article {
+section,
+article {
   margin: auto;
   margin-top: 20px;
   margin-bottom: 20px;
@@ -141,9 +144,7 @@ iframe {
 .separator {
   width: 100%;
   height: 5px;
-  box-shadow:
-    inset 0px 10px 5px -10px #10101f,
-    inset 0px -10px 5px -10px #10101f;
+  box-shadow: inset 0px 10px 5px -10px #10101f, inset 0px -10px 5px -10px #10101f;
 }
 
 .accordion {
@@ -169,7 +170,7 @@ iframe {
   overflow: hidden;
   background: var(-main-bg-color);
   box-shadow: 0px 0px 20px black;
-  transition: max-height .5s ease;
+  transition: max-height 0.5s ease;
 }
 
 .accordionContent {
