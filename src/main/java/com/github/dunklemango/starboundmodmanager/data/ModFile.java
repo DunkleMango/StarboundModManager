@@ -6,15 +6,20 @@ import java.io.File;
 import java.util.Date;
 
 public class ModFile {
-
+    public static final String MOD_FILE_EXTENSION = ".pak";
     private final File file;
     private final Date date;
-    private String name;
+    private Integer id;
 
-    public ModFile(File file, String name) throws ModFileGenerationException {
+    public ModFile(File file, Integer id) throws ModFileGenerationException {
         this.file = file;
         this.date = generateDate(file);
-        this.name = name;
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("{%s, %s, %s}", this.file, this.date, this.id);
     }
 
     private Date generateDate(File path) throws ModFileGenerationException {
@@ -36,7 +41,7 @@ public class ModFile {
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return id;
     }
 
     public boolean isNewerThan(ModFile modFile) {
@@ -51,7 +56,7 @@ public class ModFile {
         return date;
     }
 
-    public String getName() {
-        return name;
+    public Integer getId() {
+        return id;
     }
 }

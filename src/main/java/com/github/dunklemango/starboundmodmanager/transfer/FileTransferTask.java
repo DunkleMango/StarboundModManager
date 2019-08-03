@@ -1,5 +1,6 @@
 package com.github.dunklemango.starboundmodmanager.transfer;
 
+import com.github.dunklemango.starboundmodmanager.MainFrame;
 import javafx.concurrent.Task;
 import javafx.scene.control.ProgressBar;
 
@@ -15,12 +16,14 @@ public class FileTransferTask {
     private final List<File> outputFiles;
     private final double progressPerStep;
     private List <File> faultingFiles = new ArrayList<>();
+    private volatile Task<Void> task;
 
     public FileTransferTask(List<File> inputFiles, List<File> outputFiles) {
         if (inputFiles.size() != outputFiles.size()) throw new IllegalArgumentException("Size of inputFiles must match that of outputFiles!");
         this.inputFiles = inputFiles;
         this.outputFiles = outputFiles;
         this.progressPerStep = 1.0 / inputFiles.size();
+        init();
     }
 
     public FileTransferTask(File inputFile, File outputFile) {
@@ -29,12 +32,13 @@ public class FileTransferTask {
         this.inputFiles.add(inputFile);
         this.outputFiles.add(outputFile);
         this.progressPerStep = 1.0;
+        init();
     }
 
-    public void transferFiles(ProgressBar progressBar) {
-        Task<Void> task = new Task<Void>() {
+    private void init() {
+        this.task = new Task<>() {
             @Override
-            protected Void call() throws Exception {
+            protected Void call() {
                 double progress = 0.0;
                 for (int i = 0; i < inputFiles.size(); i++) {
                     File inputFile = inputFiles.get(i);
@@ -55,11 +59,18 @@ public class FileTransferTask {
                 return null;
             }
         };
-        progressBar.progressProperty().bind(task.progressProperty());
+    }
 
-        Thread thread = new Thread(task);
+    public void transferFiles(ProgressBar progressBar) {
+        progressBar.progressProperty().bind(this.task.progressProperty());
+
+        Thread thread = new Thread(this.task);
         thread.setDaemon(true);
         thread.start();
+    }
+
+    public Task<Void> getTask() {
+        return this.task;
     }
 
 }
