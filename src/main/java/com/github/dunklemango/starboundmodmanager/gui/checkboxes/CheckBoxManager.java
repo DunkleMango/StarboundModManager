@@ -11,11 +11,12 @@ public abstract class CheckBoxManager {
         filesChecked.clear();
     }
 
-    public void put(String fileName, Boolean isChecked) {
-        filesChecked.put(fileName, isChecked);
+    public void put(String checkBoxItemString, Boolean isChecked) {
+        filesChecked.put(checkBoxItemString, isChecked);
     }
 
-    public Boolean get(String fileName) {
-        return filesChecked.get(fileName);
+    public boolean get(String checkBoxItemString) {
+        Boolean tmp = filesChecked.get(checkBoxItemString);
+        return (tmp == null) ? false : tmp;
     }
 }

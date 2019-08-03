@@ -1,7 +1,6 @@
 package com.github.dunklemango.starboundmodmanager.workshop;
 
-import com.github.dunklemango.starboundmodmanager.storage.SettingsManager;
-import com.github.dunklemango.starboundmodmanager.storage.WorkshopCacheManager;
+import com.github.dunklemango.starboundmodmanager.format.JSONStringFormatter;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -19,8 +18,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Loads data from Steam and extracts usable information.
@@ -38,7 +37,8 @@ public final class WorkshopItemManager {
             workshopItems.forEach(workshopItem -> {
                 logger.debug("retrieving data from server for workshopItem with id: {}", workshopItem.getId());
                 workshopItem.setData(loadWorkshopDataFromSteam(httpClient, workshopItem.getId()));
-                logger.debug("retrieved data for workshopItem: {}", workshopItem.toString());
+                logger.debug("retrieved data for workshopItem: {}",
+                        JSONStringFormatter.formatJson(workshopItem.toJsonObject()));
             });
         } finally {
             return;

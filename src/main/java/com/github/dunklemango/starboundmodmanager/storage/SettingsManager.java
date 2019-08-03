@@ -3,7 +3,6 @@ package com.github.dunklemango.starboundmodmanager.storage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,7 +16,7 @@ public final class SettingsManager {
     private static final String DESCRIPTION = "This file stores the settings of the StarboundModManager.";
     private static SettingsManager instance;
     private Properties settings = new Properties();
-    private boolean directoriesCreated = false;
+    private boolean directoriesCreated;
 
     private SettingsManager() {
         directoriesCreated = FileManager.createDirectories(FileManager.DIR_PATH);

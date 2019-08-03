@@ -1,5 +1,6 @@
 package com.github.dunklemango.starboundmodmanager.storage;
 
+import com.github.dunklemango.starboundmodmanager.format.JSONStringFormatter;
 import com.github.dunklemango.starboundmodmanager.workshop.WorkshopItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,15 +13,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class WorkshopCacheManager {
-    private static final Logger logger = LogManager.getLogger("SettingsManager");
+    private static final Logger logger = LogManager.getLogger("WorkshopCacheManager");
     private static final String FILE_PATH = FileManager.DIR_PATH + "\\workshopCache.json";
     private static final String PARSE_KEY = "key";
     private static final String PARSE_VALUE = "value";
     private static WorkshopCacheManager instance;
-    private boolean directoriesCreated = false;
+    private boolean directoriesCreated;
     private Map<Integer, WorkshopItem> data = new HashMap<>();
 
     private WorkshopCacheManager() {
@@ -34,6 +34,22 @@ public class WorkshopCacheManager {
             instance = new WorkshopCacheManager();
         }
         return instance;
+    }
+
+    public Integer getIdFromTitle(String title) {
+        Set<Map.Entry<Integer, WorkshopItem>> entrySet = this.data.entrySet();
+        for (Map.Entry<Integer, WorkshopItem> entry: entrySet) {
+            if (entry.getValue().getTitle().contentEquals(title)) {
+                return entry.getKey();
+            }
+        }
+        return -1;
+    }
+
+    public List<String> getTitlesFromIds (List<Integer> ids) {
+        List<String> titles = new ArrayList<>();
+        ids.forEach(id -> titles.add(get(id).getTitle()));
+        return titles;
     }
 
     public void loadData() {
@@ -55,7 +71,7 @@ public class WorkshopCacheManager {
             JSONArray jsonArray = new JSONArray(str);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject mapEntryJson = jsonArray.getJSONObject(i);
-                logger.debug("String to data: mapEntryJson #{}: {}", i, mapEntryJson);
+                logger.debug("String to data: mapEntryJson #{}: {}", i, JSONStringFormatter.formatJson(mapEntryJson));
                 this.data.put(mapEntryJson.getInt(PARSE_KEY),
                         new WorkshopItem(mapEntryJson.getJSONObject(PARSE_VALUE)));
             }
@@ -71,8 +87,10 @@ public class WorkshopCacheManager {
                 JSONObject mapEntryJson = new JSONObject();
                 mapEntryJson.put(PARSE_KEY, id);
                 mapEntryJson.put(PARSE_VALUE, workshopItem.toJsonObject());
-                logger.debug("data to String: workshopItem: {}", workshopItem.toJsonObject());
-                logger.debug("data to String: mapEntryJson: {}", mapEntryJson);
+                logger.debug("data to String: workshopItem: {}",
+                        JSONStringFormatter.formatJson(workshopItem.toJsonObject()));
+                logger.debug("data to String: mapEntryJson: {}",
+                        JSONStringFormatter.formatJson(mapEntryJson));
                 jsonArray.put(mapEntryJson);
             } catch (JSONException e) {
                 logger.error("unable to convert item from data-map to JSON", e);
@@ -104,7 +122,7 @@ public class WorkshopCacheManager {
     }
 
     public List<Integer> getCachedIds() {
-        return new ArrayList<Integer>(this.data.keySet());
+        return new ArrayList<>(this.data.keySet());
     }
 
     public boolean containsKey(Integer id) {
