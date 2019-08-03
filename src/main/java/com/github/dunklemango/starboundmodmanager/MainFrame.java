@@ -5,6 +5,7 @@ import com.github.dunklemango.starboundmodmanager.exceptions.ModFileGenerationEx
 import com.github.dunklemango.starboundmodmanager.exceptions.ModFileNotFoundException;
 import com.github.dunklemango.starboundmodmanager.gui.cells.CheckBoxCell;
 import com.github.dunklemango.starboundmodmanager.gui.cells.RepresentingType;
+import com.github.dunklemango.starboundmodmanager.gui.checkboxes.CheckBoxManager;
 import com.github.dunklemango.starboundmodmanager.gui.checkboxes.InputCheckBoxManager;
 import com.github.dunklemango.starboundmodmanager.gui.checkboxes.OutputCheckBoxManager;
 import com.github.dunklemango.starboundmodmanager.storage.SettingsManager;
@@ -122,11 +123,27 @@ public class MainFrame extends Application {
                 Optional<ButtonType> result = transferAlert.showAndWait();
                 if (result.get() == ButtonType.OK) {
                     transferFiles(idsOfFilesToTransfer, primaryStage);
+                    resetCheckboxes();
                     updateOutputTable();
                 }
             }
         });
         grid.add(updateButton, 1, 4);
+    }
+
+    private void resetCheckboxes() {
+        CheckBoxManager manager;
+        manager = InputCheckBoxManager.getInstance();
+        manager.debugLogCheckBoxes("input checkboxes pre-cleaning");
+        manager.clear();
+        manager.debugLogCheckBoxes("input checkboxes post-cleaning");
+        manager = OutputCheckBoxManager.getInstance();
+        manager.debugLogCheckBoxes("output checkboxes pre-cleaning");
+        manager.clear();
+        manager.debugLogCheckBoxes("output checkboxes post-cleaning");
+
+        inputListView.refresh();
+        outputListView.refresh();
     }
 
     private void updateAllTables() {
@@ -178,6 +195,7 @@ public class MainFrame extends Application {
                 if (result.get() == ButtonType.OK) {
                     logger.debug("starting transfer..");
                     transferFiles(idsOfFilesToTransfer, primaryStage);
+                    resetCheckboxes();
                     updateOutputTable();
                 }
             }
@@ -242,7 +260,10 @@ public class MainFrame extends Application {
         });
         fileTransferTask.transferFiles(progressBar);
         grid.add(progressBar, 0, 1);
-        fileTransferTask.getTask().setOnSucceeded(event -> updateOutputTable());
+        fileTransferTask.getTask().setOnSucceeded(event -> {
+            resetCheckboxes();
+            updateOutputTable();
+        });
 
         Scene dialogScene = new Scene(grid, 300, 100);
         dialog.setScene(dialogScene);
@@ -278,6 +299,7 @@ public class MainFrame extends Application {
                             e.printStackTrace();
                         }
                     });
+                    resetCheckboxes();
                     updateOutputTable();
                 }
             }
@@ -349,6 +371,7 @@ public class MainFrame extends Application {
         chooseOutput.setOnAction(event -> {
             File path = outputDirectoryChooser.showDialog(primaryStage);
             if (path != null && path.isDirectory()) {
+                resetCheckboxes();
                 updateOutputTable();
                 outputPath = path;
                 updateOutputField();
