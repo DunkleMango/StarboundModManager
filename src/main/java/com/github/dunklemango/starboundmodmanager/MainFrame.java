@@ -17,6 +17,7 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -26,6 +27,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -33,6 +35,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class MainFrame extends Application {
@@ -49,21 +53,32 @@ public class MainFrame extends Application {
     private ObservableSet<ModFile> outputFileList = FXCollections.observableSet();
     private ListView<String> outputListView = new ListView<>(outputTitles);
     private ListView<String> inputListView = new ListView<>(inputTitles);
-    private File inputPath = new File("D:\\Programs\\Steam\\SteamApps\\workshop\\content\\211820");
-    private File outputPath = new File("D:\\Programs\\Steam\\SteamApps\\common\\Starbound\\mods");
-    private TextField inputField;
-    private TextField outputField;
+    private static final Path relativeInputPath = Paths.get("SteamApps", "workshop", "content", "211820");
+    private static final Path relativeOutputPath = Paths.get("SteamApps", "common", "Starbound", "mods");
+    private Path pathToSteam = Paths.get("D:", "Programs", "Steam");
+    private Label pathToSteamLabel;
 
     public static void main(String[] args) {
         launch(args);
     }
 
     public void start(Stage primaryStage) {
-        GridPane grid = new GridPane();
-        grid.setAlignment(Pos.CENTER);
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(25, GRID_SIDE_PADDING, 25, GRID_SIDE_PADDING));
+        GridPane outerGridPane = new GridPane();
+        outerGridPane.setAlignment(Pos.CENTER);
+        outerGridPane.setHgap(10);
+        outerGridPane.setVgap(15);
+
+        GridPane upperInnerGridPane = new GridPane();
+        upperInnerGridPane.setAlignment(Pos.CENTER);
+        upperInnerGridPane.setHgap(10);
+        upperInnerGridPane.setVgap(10);
+        upperInnerGridPane.setPadding(new Insets(15, GRID_SIDE_PADDING, 0, GRID_SIDE_PADDING));
+
+        GridPane lowerInnerGridPane = new GridPane();
+        lowerInnerGridPane.setAlignment(Pos.CENTER);
+        lowerInnerGridPane.setHgap(10);
+        lowerInnerGridPane.setVgap(10);
+        lowerInnerGridPane.setPadding(new Insets(0, GRID_SIDE_PADDING, 15, GRID_SIDE_PADDING));
 
         buttonVBox.setPrefWidth(FRAME_WIDTH / 2 - GRID_SIDE_PADDING);
 
@@ -72,20 +87,25 @@ public class MainFrame extends Application {
         loadCachedWorkshopItems();
         logger.debug("workshop-item-cache loaded");
 
-        inputField = new TextField(inputPath.getAbsolutePath());
-        outputField = new TextField(outputPath.getAbsolutePath());
-        if (inputPath.exists()) addDirectoriesOfPath(inputPath, inputIds, inputDirList);
-        if (outputPath.exists()) addFilesOfPath(outputPath, inputIds, outputFileList);
+        File inputPathFile = getInputPath().toFile();
+        File outputPathFile = getOutputPath().toFile();
 
-        setupInputPanels(grid, primaryStage);
-        setupOutputPanels(grid, primaryStage);
+        if (inputPathFile.exists()) addDirectoriesOfPath(inputPathFile, inputIds, inputDirList);
+        if (outputPathFile.exists()) addFilesOfPath(outputPathFile, inputIds, outputFileList);
 
-        setupTransferButton(grid, primaryStage);
-        setupUpdateButton(grid, primaryStage);
+        setupInputPanels(lowerInnerGridPane, primaryStage);
+        setupOutputPanels(lowerInnerGridPane, primaryStage);
+        setupPathSelector(upperInnerGridPane, primaryStage);
 
-        setupClearButton(grid);
+        setupTransferButton(lowerInnerGridPane, primaryStage);
+        setupUpdateButton(lowerInnerGridPane, primaryStage);
 
-        Scene scene = new Scene(grid, FRAME_WIDTH, FRAME_HEIGHT);
+        setupClearButton(lowerInnerGridPane);
+
+        outerGridPane.add(upperInnerGridPane, 0, 0);
+        outerGridPane.add(lowerInnerGridPane, 0, 1);
+
+        Scene scene = new Scene(outerGridPane, FRAME_WIDTH, FRAME_HEIGHT);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Starbound Mod Manager");
         primaryStage.setResizable(false);
@@ -95,6 +115,48 @@ public class MainFrame extends Application {
         });
         updateAllTables();
         primaryStage.show();
+    }
+
+    private double getMaxHSize() {
+        return FRAME_WIDTH - GRID_SIDE_PADDING * 2;
+    }
+
+    private void setupPathSelector(GridPane grid, Stage primaryStage) {
+        pathToSteamLabel = new Label(this.pathToSteam.toString());
+        pathToSteamLabel.setFont(Font.font("Tahoma", FontWeight.NORMAL, 12));
+        pathToSteamLabel.setTextAlignment(TextAlignment.CENTER);
+
+        DirectoryChooser steamPathChooser = new DirectoryChooser();
+        File pathToSteamFile = this.pathToSteam.toFile();
+        if (pathToSteamFile.exists() && pathToSteamFile.isDirectory())
+            steamPathChooser.setInitialDirectory(pathToSteamFile);
+
+        Button buttonChooseSteamPath = new Button("Select your Steam directory");
+        buttonChooseSteamPath.setPrefWidth(getMaxHSize());
+        buttonChooseSteamPath.setMinWidth(buttonVBox.getPrefWidth());
+        buttonChooseSteamPath.setOnAction(event -> {
+            File path = steamPathChooser.showDialog(primaryStage);
+            if (path != null && path.isDirectory()) {
+                this.pathToSteam = path.toPath();
+                logger.debug("set steam path to: {}", this.pathToSteam);
+                updateSteamPathField();
+                resetCheckboxes();
+                updateInputTable();
+                updateOutputTable();
+            }
+        });
+
+        grid.add(pathToSteamLabel, 0, 0);
+        GridPane.setHalignment(pathToSteamLabel, HPos.CENTER);
+        grid.add(buttonChooseSteamPath, 0, 1);
+    }
+
+    private Path getInputPath() {
+        return this.pathToSteam.resolve(MainFrame.relativeInputPath);
+    }
+
+    private Path getOutputPath() {
+        return this.pathToSteam.resolve(MainFrame.relativeOutputPath);
     }
 
     private void setupUpdateButton(GridPane grid, Stage primaryStage) {
@@ -128,7 +190,7 @@ public class MainFrame extends Application {
                 }
             }
         });
-        grid.add(updateButton, 1, 4);
+        grid.add(updateButton, 1, 3);
     }
 
     private void resetCheckboxes() {
@@ -157,14 +219,14 @@ public class MainFrame extends Application {
 
     private void updateInputTable() {
         inputIds.clear();
-        addDirectoriesOfPath(inputPath, inputIds, inputDirList);
+        addDirectoriesOfPath(getInputPath().toFile(), inputIds, inputDirList);
         inputTitles.clear();
         inputTitles.addAll(WorkshopCacheManager.getInstance().getTitlesFromIds(inputIds));
     }
 
     private void updateOutputTable() {
         outputIds.clear();
-        addFilesOfPath(outputPath, outputIds, outputFileList);
+        addFilesOfPath(getOutputPath().toFile(), outputIds, outputFileList);
         outputTitles.clear();
         outputTitles.addAll(WorkshopCacheManager.getInstance().getTitlesFromIds(outputIds));
     }
@@ -176,12 +238,11 @@ public class MainFrame extends Application {
 
         Button transferButton = new Button("Transfer Selected");
         transferButton.setMinWidth(buttonVBox.getPrefWidth());
-        WorkshopCacheManager workshopCacheManager = WorkshopCacheManager.getInstance();
+        WorkshopCacheManager wcm = WorkshopCacheManager.getInstance();
         transferButton.setOnAction(event -> {
             List<Integer> idsOfFilesToTransfer = new ArrayList<>();
             inputIds.forEach(id -> {
                 InputCheckBoxManager manager = InputCheckBoxManager.getInstance();
-                WorkshopCacheManager wcm = WorkshopCacheManager.getInstance();
                 boolean isCheckboxSet = manager.get(wcm.get(id).getTitle());
                 logger.debug("checkbox id: {}, value: {}", id, isCheckboxSet);
                 if (isCheckboxSet) {
@@ -200,7 +261,7 @@ public class MainFrame extends Application {
                 }
             }
         });
-        grid.add(transferButton, 0, 4);
+        grid.add(transferButton, 0, 3);
     }
 
     private void transferFiles(List<Integer> idsOfFilesToTransfer, Stage primaryStage) {
@@ -239,10 +300,11 @@ public class MainFrame extends Application {
                 logger.debug("files in input dir: {}", Arrays.asList(subFiles));
                 if (subFiles != null && subFiles.length == 1) {
                     File inputFile = subFiles[0];
-                    File outputFile = new File(outputPath.getAbsolutePath() + "\\" + id + ".pak");
+                    File outputFile = this.getOutputPath().resolve(id + ModFile.MOD_FILE_EXTENSION).toFile();
                     logger.debug("writing modFile: {}", outputFile);
-                    if (inputFile.exists() && outputPath.exists()) {
-                        logger.debug("input file \"{}\" and output path \"{}\" exists", inputFile, outputPath);
+                    if (inputFile.exists() && outputFile.exists()) {
+                        logger.debug("input file \"{}\" and output path \"{}\" exists", inputFile,
+                                outputFile.getAbsolutePath());
                         inputFiles.add(inputFile);
                         outputFiles.add(outputFile);
                     }
@@ -304,7 +366,7 @@ public class MainFrame extends Application {
                 }
             }
         });
-        grid.add(clearButton, 1, 5);
+        grid.add(clearButton, 1, 4);
     }
 
     private String fuseTitlesForDisplay(List<Integer> idsOfFiles, RepresentingType type) {
@@ -329,9 +391,9 @@ public class MainFrame extends Application {
     }
 
     private void saveSettings() {
+        //TODO change settings to only use Steam main path
         SettingsManager settingsManager = SettingsManager.getInstance();
-        settingsManager.setSetting(SettingsManager.INPUT_PATH, inputPath.getAbsolutePath());
-        settingsManager.setSetting(SettingsManager.OUTPUT_PATH, outputPath.getAbsolutePath());
+        settingsManager.setSetting(SettingsManager.STEAM_PATH, this.pathToSteam.toString());
         settingsManager.saveSettings();
     }
 
@@ -342,10 +404,8 @@ public class MainFrame extends Application {
 
     private void loadSettings() {
         SettingsManager settingsManager = SettingsManager.getInstance();
-        String inputPathString = settingsManager.getSetting(SettingsManager.INPUT_PATH);
-        if (inputPathString != null) this.inputPath = new File(inputPathString);
-        String outputPathString = settingsManager.getSetting(SettingsManager.OUTPUT_PATH);
-        if (outputPathString != null) this.outputPath = new File(outputPathString);
+        String steamPathString = settingsManager.getSetting(SettingsManager.STEAM_PATH);
+        if (steamPathString != null) this.pathToSteam = Paths.get(steamPathString);
     }
 
     private void loadCachedWorkshopItems() {
@@ -360,24 +420,6 @@ public class MainFrame extends Application {
 
         outputListView.setCellFactory((view) -> new CheckBoxCell(RepresentingType.OUTPUT));
         grid.add(outputListView, 1, 1);
-
-        grid.add(outputField, 1, 2);
-
-        DirectoryChooser outputDirectoryChooser = new DirectoryChooser();
-        if (outputPath.exists() && outputPath.isDirectory()) outputDirectoryChooser.setInitialDirectory(outputPath);
-
-        Button chooseOutput = new Button("Choose output directory");
-        chooseOutput.setMinWidth(buttonVBox.getPrefWidth());
-        chooseOutput.setOnAction(event -> {
-            File path = outputDirectoryChooser.showDialog(primaryStage);
-            if (path != null && path.isDirectory()) {
-                resetCheckboxes();
-                updateOutputTable();
-                outputPath = path;
-                updateOutputField();
-            }
-        });
-        grid.add(chooseOutput, 1, 3);
     }
 
     private void setupInputPanels(GridPane grid, Stage primaryStage) {
@@ -387,23 +429,6 @@ public class MainFrame extends Application {
 
         inputListView.setCellFactory((view) -> new CheckBoxCell(RepresentingType.INPUT));
         grid.add(inputListView, 0, 1);
-
-        grid.add(inputField, 0, 2);
-
-        DirectoryChooser inputDirectoryChooser = new DirectoryChooser();
-        if (inputPath.exists() && inputPath.isDirectory()) inputDirectoryChooser.setInitialDirectory(inputPath);
-
-        Button chooseInput = new Button("Choose input directory");
-        chooseInput.setMinWidth(buttonVBox.getPrefWidth());
-        chooseInput.setOnAction(event -> {
-            File path = inputDirectoryChooser.showDialog(primaryStage);
-            if (path != null && path.isDirectory()) {
-                updateInputTable();
-                inputPath = path;
-                updateInputField();
-            }
-        });
-        grid.add(chooseInput, 0, 3);
     }
 
     private void deletePakFile(File file) {
@@ -412,17 +437,10 @@ public class MainFrame extends Application {
         }
     }
 
-    private void updateOutputField() {
-        outputField.clear();
-        if (outputPath != null) {
-            outputField.setText(outputPath.getAbsolutePath());
-        }
-    }
-
-    private void updateInputField() {
-        inputField.clear();
-        if (inputPath != null) {
-            inputField.setText(inputPath.getAbsolutePath());
+    private void updateSteamPathField() {
+        pathToSteamLabel.setText("[No Steam directory selected!]");
+        if (this.pathToSteam != null) {
+            pathToSteamLabel.setText(this.pathToSteam.toString());
         }
     }
 
@@ -443,7 +461,12 @@ public class MainFrame extends Application {
 
     private void addDirectoriesOfPath(File path, List<Integer> idsOfDirs, ObservableSet<ModFile> dirSet) {
         logger.debug("adding directories of path {}", path);
-        checkDirectoryCorrect(path);
+        try {
+            checkDirectoryCorrect(path);
+        } catch (IllegalArgumentException e) {
+            logger.error("input directory was not correct: {}", path.getAbsolutePath(), e);
+            return;
+        }
         File[] files = path.listFiles((dir, name) -> dir.isDirectory());
         logger.debug("dirs of path {}", (files != null) ? Arrays.asList(files) : "null");
         List<Integer> workshopIds = new ArrayList<>();
@@ -480,7 +503,12 @@ public class MainFrame extends Application {
 
     private void addFilesOfPath(File path, List<Integer> idsOfFiles, ObservableSet<ModFile> fileSet) {
         logger.debug("adding files of path {}", path);
-        checkDirectoryCorrect(path);
+        try {
+            checkDirectoryCorrect(path);
+        } catch (IllegalArgumentException e) {
+            logger.error("output directory was not correct: {}", path.getAbsolutePath(), e);
+            return;
+        }
         File[] files = path.listFiles((subFile, name) -> name.toLowerCase().endsWith(ModFile.MOD_FILE_EXTENSION));
         logger.debug("files on path: {}", (files != null) ? Arrays.asList(files) : "null");
         List<Integer> workshopIds = new ArrayList<>();
