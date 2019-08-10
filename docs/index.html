@@ -1,61 +1,91 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>StarboundModManager</title>
-  <link rel="stylesheet" href="css/index.css">
-  <link href="https://fonts.googleapis.com/css?family=Lato|Raleway&display=swap" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
-</head>
-<body>
-  <header>
-    <h1>A mod manager for the game Starbound</h1>
-  </header>
-  <div class="pageContent">
-    <article id="buyGame">
-      <button class="accordion active">Do you want to buy the game?</button>
-      <div class="accordionContent">
-        <p>If you want to support the creators of Starbound, you can buy it here (or just visit their <a href="https://playstarbound.com/">homepage</a>)</p>
-        <iframe name="buy Starbound" src="https://store.steampowered.com/widget/211820/" width="100%" height="190">buy Starbound</iframe>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Starbound Mod Manager</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body class="bg-dark">
+    <header>
+      <div class="jumbotron jumbotron-fluid bg-primary text-white">
+        <h2 class="display-5 text-center">A Mod Manager for Starbound!</h2>
       </div>
-    </article>
-    <div class="separator"></div>
-    <section id="intro">
-      <!-- introduction -->
-      <p>The StarboundModManager enables the user to manage mods for the game <a href="http://playstarbound.com/">Starbound</a> with ease (works with Steam). No experience needed!</p>
-      <div class="disclaimer">
-        <p>This application is in no way associated with the game <a href="http://playstarbound.com/">Starbound</a> and their creators <a href="https://chucklefish.org/">Chucklefish</a>!<br>
-          It was created by <a href="https://github.com/DunkleMango">me</a> to simplify the tedious task of managing many different mods for the game.</p>
+    </header>
+    <main>
+      <div class="container-fluid">
+        <div class="row">
+          <!-- Main Content -->
+          <div class="col-lg-9 col-md-8">
+            <div class="card mx-3 mb-5 shadow-lg bg-dark">
+              <div class="card-header bg-warning text-center">Do you want to buy the game?</div>
+              <div class="card-body text-white">
+                <p class="card-text text-center">
+                  If you want to support the devs of Starbound, you can buy it here! (Or just visit their
+                  <a href="https://playstarbound.com/" target="_blank">homepage</a>
+                </p>
+                <iframe
+                  frameborder="0"
+                  name="buy Starbound"
+                  src="https://store.steampowered.com/widget/211820/"
+                  width="100%"
+                  height="190"
+                  >buy Starbound
+                </iframe>
+              </div>
+            </div>
+            <p class="text-white text-center">
+              The Starbound Mod Manager enables users to handle multiple mod lists easily. (works with Steam!). No
+              experience needed!
+            </p>
+            <div class="card mx-5 shadow-sm" style="background-color: rgb(50,7,0); border: 2pt dashed rgb(114,23,0)">
+              <p class="text-white text-center px-4 pt-3">
+                This application is in no way associated with Starbound and their creators Chucklefish! It was created
+                by me to simplify the tedious task of managing many different mods for the game.
+              </p>
+            </div>
+            <div class="text-center">
+              <iframe class="commitIFrame rounded-lg my-5" src="commits.html" width="600" height="800"></iframe>
+            </div>
+          </div>
+          <!-- Navigation and About -->
+          <div class="col-lg-3 col-md-4">
+            <div class="card mb-3 shadow-lg bg-dark text-white text-center">
+              <img src="https://avatars0.githubusercontent.com/u/44678770" class="card-img-top" alt="Github Avatar" />
+              <p class="card-text m-2">
+                Hey, I am the creator of the StarboundModManager! You can click on my profile image to visit my Github
+                accout, where I create even more stuff.
+              </p>
+            </div>
+            <div class="card mb-3 shadow-lg bg-dark text-white text-center">
+              <div class="card-header bg-primary h2">Navigation</div>
+              <div class="card-body">
+                <button type="button" class="btn btn-outline-primary btn-lg btn-block">Documentation</button>
+                <button type="button" class="btn btn-outline-primary btn-lg btn-block">Download</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
-    <div class="separator"></div>
-    <section>
-      <!-- main content -->
-      <h2>Commits</h2>
-      <iframe class="commitIFrame" src="commits.html" width="600" height="800"></iframe>
-    </section>
-  </div>
-  <div class="pageSideBar">
-    <div class="wrapper">
-      <div>
-        <a href="https://github.com/DunkleMango" class="imgLink"><img src="https://avatars0.githubusercontent.com/u/44678770" class="userIcon"/></a>
-      </div>
-      <div class="userDescription">
-        <p>Hey, I am the creator of the StarboundModManager!</p>
-        <p>You can click on my profile image to visit my Github accout, where I create even more stuff.</p>
-      </div>
-    </div>
-    <div class="pageNavigation">
-      <p>Navigation</p>
-      <nav id="navBarVert">
-        <ul id="navListVert">
-          <li><a href="#" class="navLink">Documentation</a></li>
-          <li><a href="#" class="navLink">Download</a></li>
-        </ul>
-      </nav>
-    </div>
-  </div>
-</body>
-<script type="text/javascript" src="js/accordion.js"></script>
+    </main>
+  </body>
+  <script
+    src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"
+  ></script>
 </html>
