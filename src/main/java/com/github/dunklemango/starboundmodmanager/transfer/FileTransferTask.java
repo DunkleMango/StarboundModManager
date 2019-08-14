@@ -36,7 +36,7 @@ public class FileTransferTask {
     }
 
     private void init() {
-        this.task = new Task<>() {
+        this.task = new Task<Void>() {
             @Override
             protected Void call() {
                 double progress = 0.0;
