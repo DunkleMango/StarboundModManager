@@ -22,6 +22,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -41,6 +42,7 @@ import java.util.*;
 
 public class MainFrame extends Application {
     private static final Logger logger = LogManager.getLogger("Application");
+    private static final String PATH_TO_APP_ICON = "/icon.png";
     private static final double FRAME_WIDTH = 500;
     private static final double FRAME_HEIGHT = 500;
     private static final double GRID_SIDE_PADDING = 25;
@@ -63,6 +65,8 @@ public class MainFrame extends Application {
     }
 
     public void start(Stage primaryStage) {
+        primaryStage.getIcons().add(new Image(MainFrame.class.getResourceAsStream(PATH_TO_APP_ICON)));
+
         GridPane outerGridPane = new GridPane();
         outerGridPane.setAlignment(Pos.CENTER);
         outerGridPane.setHgap(10);
@@ -418,7 +422,7 @@ public class MainFrame extends Application {
         rightTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(rightTitle, 1, 0);
 
-        outputListView.setCellFactory((view) -> new CheckBoxCell(RepresentingType.OUTPUT));
+        outputListView.setCellFactory((view) -> new CheckBoxCell(RepresentingType.OUTPUT, outputListView));
         grid.add(outputListView, 1, 1);
     }
 
@@ -427,7 +431,7 @@ public class MainFrame extends Application {
         leftTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(leftTitle, 0, 0);
 
-        inputListView.setCellFactory((view) -> new CheckBoxCell(RepresentingType.INPUT));
+        inputListView.setCellFactory((view) -> new CheckBoxCell(RepresentingType.INPUT, inputListView));
         grid.add(inputListView, 0, 1);
     }
 

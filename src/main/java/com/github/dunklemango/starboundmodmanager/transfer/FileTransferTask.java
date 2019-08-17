@@ -3,6 +3,8 @@ package com.github.dunklemango.starboundmodmanager.transfer;
 import com.github.dunklemango.starboundmodmanager.MainFrame;
 import javafx.concurrent.Task;
 import javafx.scene.control.ProgressBar;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileTransferTask {
-
+    private static final Logger logger = LogManager.getLogger("FileTransferTask");
     private final List<File> inputFiles;
     private final List<File> outputFiles;
     private final double progressPerStep;
@@ -59,6 +61,10 @@ public class FileTransferTask {
                 return null;
             }
         };
+
+        this.task.setOnSucceeded(workerStateEvent -> {
+            if (!faultingFiles.isEmpty()) logger.error("Following files could not be copied: {}", faultingFiles);
+        });
     }
 
     public void transferFiles(ProgressBar progressBar) {
