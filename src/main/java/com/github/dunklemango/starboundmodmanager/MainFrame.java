@@ -11,6 +11,7 @@ import com.github.dunklemango.starboundmodmanager.gui.checkboxes.OutputCheckBoxM
 import com.github.dunklemango.starboundmodmanager.storage.SettingsManager;
 import com.github.dunklemango.starboundmodmanager.storage.WorkshopCacheManager;
 import com.github.dunklemango.starboundmodmanager.transfer.FileTransferTask;
+import com.github.dunklemango.starboundmodmanager.transfer.TransferTaskInformation;
 import com.github.dunklemango.starboundmodmanager.workshop.WorkshopItem;
 import com.github.dunklemango.starboundmodmanager.workshop.WorkshopItemManager;
 import javafx.application.Application;
@@ -36,9 +37,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class MainFrame extends Application {
     private static final Logger logger = LogManager.getLogger("Application");
@@ -306,7 +310,7 @@ public class MainFrame extends Application {
                     File inputFile = subFiles[0];
                     File outputFile = this.getOutputPath().resolve(id + ModFile.MOD_FILE_EXTENSION).toFile();
                     logger.debug("writing modFile: {}", outputFile);
-                    if (inputFile.exists() && outputFile.exists()) {
+                    if (inputFile.exists()) {
                         logger.debug("input file \"{}\" and output path \"{}\" exists", inputFile,
                                 outputFile.getAbsolutePath());
                         inputFiles.add(inputFile);
@@ -315,8 +319,8 @@ public class MainFrame extends Application {
                 }
             }
         }
-
-
+        logger.debug("inputFiles: {}", inputFiles);
+        logger.debug("outputFiles: {}", outputFiles);
         FileTransferTask fileTransferTask = new FileTransferTask(inputFiles, outputFiles);
 
         progressBar.progressProperty().addListener((obs, ov, nv) -> {
@@ -326,10 +330,16 @@ public class MainFrame extends Application {
         });
         fileTransferTask.transferFiles(progressBar);
         grid.add(progressBar, 0, 1);
-        fileTransferTask.getTask().setOnSucceeded(event -> {
+        fileTransferTask.setOnSucceeded(event -> {
             resetCheckboxes();
             updateOutputTable();
         });
+        try {
+            TransferTaskInformation info = fileTransferTask.get();
+            info.print();
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Unable to print faulting files of transfer task.", e);
+        }
 
         Scene dialogScene = new Scene(grid, 300, 100);
         dialog.setScene(dialogScene);
