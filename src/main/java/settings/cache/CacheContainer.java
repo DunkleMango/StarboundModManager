@@ -1,11 +1,12 @@
 package settings.cache;
 
-import data.CacheFileManager;
+import data.JSONObjectListFileManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.PieChart;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -38,9 +39,9 @@ public final class CacheContainer {
     }
 
     /**
-     * Returns the only instance of the CacheManager. If no instance exists yet, a new one will be created and returned.
+     * Returns the only instance of the {@link CacheContainer}. If no instance exists yet, a new one will be created and returned.
      * Implements synchronized functionality for multithreaded access.
-     * @return instance CacheManager instance
+     * @return instance {@link CacheContainer} instance
      */
     public static synchronized CacheContainer getInstance() {
         if (instance == null) {
@@ -54,8 +55,8 @@ public final class CacheContainer {
         return instance;
     }
 
-    public void load(File cacheFile) {
-        CacheFileManager cfm = new CacheFileManager();
+    public void load(@NotNull File cacheFile) {
+        JSONObjectListFileManager cfm = new JSONObjectListFileManager();
         try {
             List<JSONObject> jsonObjects = cfm.load(cacheFile);
         } catch (IOException e) {
@@ -68,7 +69,7 @@ public final class CacheContainer {
      * Loads the current cache-statistics into the observable
      * @param cachePieChart The {@link PieChart} to update
      */
-    public void linkStatistics(PieChart cachePieChart) {
+    public void linkStatistics(@NotNull PieChart cachePieChart) {
         cachePieChart.setData(this.observableCacheData);
         cachePieChart.setStartAngle(180);
         cachePieChart.setClockwise(false);

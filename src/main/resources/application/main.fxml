@@ -24,7 +24,7 @@
                      <children>
                         <VBox alignment="TOP_CENTER" spacing="5.0">
                            <children>
-                              <Label fx:id="pathToSteamLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" text="default path to steam" wrapText="true">
+                              <Label fx:id="steamDirectoryLabel" alignment="CENTER" maxWidth="1.7976931348623157E308" text="default path to steam" wrapText="true">
                                  <font>
                                     <Font name="System Italic" size="16.0" />
                                  </font>
@@ -32,7 +32,7 @@
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
                               </Label>
-                              <Button fx:id="selectPathToSteamButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onPathToSteamSelectAction" text="select path to steam">
+                              <Button fx:id="steamDirectorySelectButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSteamDirectorySelectAction" text="select path to steam">
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
