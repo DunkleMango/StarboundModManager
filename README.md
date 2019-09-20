@@ -6,6 +6,8 @@ The StarboundModManager enables the user to manage their mods from the game [Sta
 This application is in no way associated with Starbound and their creators Chucklefish!  
 It was only created by [DunkleMango](https://github.com/DunkleMango) for the purpose of simplifying the process of managing mods for the game.  
 
+See the [wiki](https://github.com/DunkleMango/StarboundModManager/wiki) for more information!
+
 ## Sections
 + [Setting up the application (v1.2.*)](#setting-up-the-application-v12)  
 + [Using the application correctly (v1.2.*)](#using-the-application-correctly-v12)  
