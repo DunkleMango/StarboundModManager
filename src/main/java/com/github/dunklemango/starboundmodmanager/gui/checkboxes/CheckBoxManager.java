@@ -2,9 +2,10 @@ package com.github.dunklemango.starboundmodmanager.gui.checkboxes;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class CheckBoxManager {
-
     protected ObservableMap<String, Boolean> filesChecked = FXCollections.observableHashMap();
 
     public void clear() {
@@ -19,4 +20,6 @@ public abstract class CheckBoxManager {
         Boolean tmp = filesChecked.get(checkBoxItemString);
         return (tmp == null) ? false : tmp;
     }
+
+    public abstract void debugLogCheckBoxes(String prefix);
 }

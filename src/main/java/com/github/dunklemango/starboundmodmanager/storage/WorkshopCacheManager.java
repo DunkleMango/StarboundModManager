@@ -56,8 +56,8 @@ public class WorkshopCacheManager {
         Path path = new File(FILE_PATH).toPath();
         if (directoriesCreated && Files.exists(path)) {
             try {
-                String content = Files.readString(path);
-                if (content != null && !content.isBlank()) {
+                String content = new String(Files.readAllBytes(path));
+                if (content != null && !content.isEmpty()) {
                     parseStringToData(content);
                 }
             } catch (IOException e) {
@@ -102,7 +102,7 @@ public class WorkshopCacheManager {
     public void saveData() {
         if (directoriesCreated) {
             try {
-                Files.writeString(new File(FILE_PATH).toPath(), mapToJson().toString());
+                Files.write(new File(FILE_PATH).toPath(), Collections.singleton(mapToJson().toString()));
             } catch (IOException e) {
                 logger.error("{} could not be located.", FILE_PATH);
             }

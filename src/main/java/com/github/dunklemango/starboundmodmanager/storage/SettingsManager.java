@@ -9,8 +9,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public final class SettingsManager {
-    public static final String INPUT_PATH = "input.path";
-    public static final String OUTPUT_PATH = "output.path";
+    public static final String STEAM_PATH = "path.steam";
     private static final Logger logger = LogManager.getLogger("SettingsManager");
     private static final String FILE_PATH = FileManager.DIR_PATH + "\\settings.properties";
     private static final String DESCRIPTION = "This file stores the settings of the StarboundModManager.";

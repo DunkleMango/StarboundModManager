@@ -3,26 +3,32 @@ package com.github.dunklemango.starboundmodmanager.gui.cells;
 import com.github.dunklemango.starboundmodmanager.gui.checkboxes.CheckBoxManager;
 import com.github.dunklemango.starboundmodmanager.gui.checkboxes.InputCheckBoxManager;
 import com.github.dunklemango.starboundmodmanager.gui.checkboxes.OutputCheckBoxManager;
+import javafx.geometry.Insets;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CheckBoxCell extends ListCell<String> {
-
+    private static final Logger logger = LogManager.getLogger("CheckBoxCell");
     private final RepresentingType type;
     private HBox hBox = new HBox();
     private Label label = new Label("(empty)");
     private Pane pane = new Pane();
     private CheckBox checkBox = new CheckBox();
     private CheckBoxManager checkBoxManager;
+    private final ListView<String> parent;
     String lastItem;
 
-    public CheckBoxCell(RepresentingType type) {
+    public CheckBoxCell(RepresentingType type, ListView<String> parent) {
         super();
         this.type = type;
+        this.parent = parent;
 
         init();
     }
@@ -40,8 +46,13 @@ public class CheckBoxCell extends ListCell<String> {
         checkBox.setOnAction(event -> {
             checkBoxManager.put(getItem(), getChecked());
         });
+
+        label.setWrapText(true);
+        label.setPadding(new Insets(0, 2, 0, 2));
         hBox.getChildren().addAll(label, pane, checkBox);
-        HBox.setHgrow(pane, Priority.ALWAYS);
+        label.setMaxWidth(parent.getWidth() - 60);
+        hBox.setHgrow(pane, Priority.ALWAYS);
+        hBox.setPadding(new Insets(5, 0, 5 ,0));
     }
 
     @Override
