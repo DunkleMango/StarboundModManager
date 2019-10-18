@@ -1,8 +1,10 @@
+import data.mod.ModDataManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import settings.AppSettingsCoordinator;
 
 /**
  * The main application for user interaction.
@@ -22,6 +24,10 @@ public class MainApplication extends Application {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+        stage.setOnCloseRequest(event -> {
+            AppSettingsCoordinator.getInstance().saveSettings();
+            ModDataManager.getInstance().saveModsToCache();
+        });
     }
 
     /**

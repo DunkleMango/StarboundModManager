@@ -14,7 +14,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<TabPane fx:id="rootTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="640.0" prefWidth="480.0" stylesheets="@main.css" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainController">
+<TabPane fx:id="rootTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="640.0" prefWidth="600.0" stylesheets="@main.css" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainController">
   <tabs>
     <Tab fx:id="settingsTab" onSelectionChanged="#onTabSelection" text="Settings">
       <content>
@@ -32,7 +32,7 @@
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
                               </Label>
-                              <Button fx:id="steamDirectorySelectButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSteamDirectorySelectAction" text="select path to steam">
+                              <Button fx:id="steamDirectorySelectButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSteamDirectorySelectAction" text="select steam directory">
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
@@ -58,7 +58,7 @@
                                     <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                                  </padding>
                               </HBox>
-                              <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="clear cache">
+                              <Button fx:id="clearCacheButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onClearCacheAction" text="clear cache">
                                  <VBox.margin>
                                     <Insets left="20.0" right="20.0" />
                                  </VBox.margin>
@@ -79,14 +79,14 @@
                      <children>
                         <HBox alignment="TOP_CENTER" spacing="20.0">
                            <children>
-                              <VBox alignment="TOP_CENTER" spacing="10.0">
+                              <VBox alignment="TOP_CENTER" prefWidth="256.0" spacing="10.0">
                                  <children>
                                     <Label text="Workshop">
                                        <font>
                                           <Font size="24.0" />
                                        </font>
                                     </Label>
-                                    <ListView prefHeight="358.0" prefWidth="200.0" />
+                                    <ListView fx:id="workshopModsListView" onMouseClicked="#onWorkshopItemSelection" prefHeight="358.0" prefWidth="200.0" />
                                     <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="copy selected">
                                        <VBox.margin>
                                           <Insets />
@@ -94,7 +94,7 @@
                                     </Button>
                                  </children>
                               </VBox>
-                              <VBox alignment="TOP_CENTER" spacing="10.0">
+                              <VBox alignment="TOP_CENTER" prefWidth="256.0" spacing="10.0">
                                  <children>
                                     <Label text="Starbound">
                                        <font>

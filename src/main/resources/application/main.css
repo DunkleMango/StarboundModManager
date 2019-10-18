@@ -1,21 +1,34 @@
+* {
+  -fx-vars-accent-color: #3399ff;
+  -fx-vars-button-background-color: -fx-vars-accent-color;
+  -fx-vars-button-shadow-color: #2288cc;
+  -fx-vars-button-hover-background-color: #2277dd;
+  -fx-vars-button-hover-shadow-color: -fx-vars-button-hover-background-color;
+  -fx-vars-button-armed-background-color: -fx-vars-button-hover-background-color;
+  -fx-vars-button-armed-shadow-color: #2255cc;
+}
+
 .button {
-  -fx-background-color: #3399ff;
+  -fx-background-color: -fx-vars-button-background-color;
   -fx-background-radius: 2px;
   -fx-font-size: 1.3em;
   -fx-text-fill: white;
   -fx-label-padding: 2px;
-  -fx-effect: dropshadow(three-pass-box, #2288cc, 4, 0.1, 0, 2);
+  -fx-effect: dropshadow(three-pass-box,
+    -fx-vars-button-shadow-color, 4, 0.1, 0, 2);
 }
 
 .button:hover {
-  -fx-background-color: #2277dd;
-  -fx-effect: dropshadow(three-pass-box, #2288cc, 1, 0.1, 0, 1);
+  -fx-background-color: -fx-vars-button-hover-background-color;
+  -fx-effect: dropshadow(three-pass-box,
+    -fx-vars-button-hover-shadow-color, 1, 0.1, 0, 1);
   -fx-cursor: hand;
 }
 
 .button:armed {
-  -fx-background-color: #2277dd;
-  -fx-effect: innershadow(three-pass-box, #2255cc, 6, 0.1, 0, 6);
+  -fx-background-color: -fx-vars-button-armed-background-color;
+  -fx-effect: innershadow(three-pass-box,
+    -fx-vars-button-armed-shadow-color, 6, 0.1, 0, 6);
 }
 
 .button Text {
@@ -23,10 +36,8 @@
   -fx-effect: dropshadow(three-pass-box, black, 5, 0.5, 0, 1);
 }
 
-#pathToSteamLabel {
-  -fx-background-color: lightgrey, white, -fx-background;
-  -fx-background-insets: 0, 1, 2;
-  -fx-background-radius: 20px;
-  -fx-effect: innershadow(three-pass-box, #3388cc, 2, 0.1, 0, 0.5);
+#steamDirectoryLabel {
+  -fx-border-color: -fx-vars-accent-color;
+  -fx-border-radius: 2px;
   -fx-label-padding: 4px;
 }
