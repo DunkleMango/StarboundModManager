@@ -51,7 +51,12 @@ $.getJSON('https://api.github.com/repos/DunkleMango/StarboundModManager/commits'
     var builder = "";
     builder += `<div class=\"commitWrapper\">`;
     builder += `<div class=\"commitInfoWrapper\">`;
-    builder += `<p class=\"commitMessage\">${messages[index].replace(/\n/g, "<br>")}</p>`;
+    var commitMessageHead = (messages[index].split(/\n/g, 1))[0];
+    var commitMessageBody = messages[index].substr(commitMessageHead.length + 2, messages[index].length); // + 2 on the head.length to remove first and second linebreak
+    builder += `<p class=\"commitMessageHead\">${commitMessageHead}</p>`;
+    if (commitMessageBody != null) {
+      builder += `<p class=\"commitMessageBody\">${commitMessageBody.replace(/\n/g, "<br>")}</p>`;
+    }
     builder += `<div class=\"commitUserWrapper\">`;
     builder += `<div class=\"commitUserImgWrapper\"><a href=${authorsLink[index]} class=\"imgLink\">
                 <img src=\'${authorsImg[index]}\' class=\"commitUserImg\"/></a></div>`;

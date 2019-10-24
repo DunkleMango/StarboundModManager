@@ -43,9 +43,16 @@
   margin: 10px 20px;
 }
 
-.commitMessage {
+.commitMessageHead {
   text-align: left;
   margin-left: 20px;
+}
+
+.commitMessageBody {
+  text-align: left;
+  margin-left: 20px;
+  font-size: 90%;
+  color: darkgrey;
 }
 
 .commitUserWrapper {
