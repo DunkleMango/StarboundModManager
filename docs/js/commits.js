@@ -29,18 +29,23 @@ $.getJSON('https://api.github.com/repos/DunkleMango/StarboundModManager/commits'
     var builder = "";
     var lastDate = null;
     for (var i = 0; i < dates.length; i++) {
-      var diff = getDateDifference(lastDate, dates[i]);
-      if (lastDate == null || diff > millisOfADay) {
+      if (lastDate == null || dates[i].getDate() != lastDate.getDate()) {
         if (i > 0) {
           builder += `<div class=\"commitGroupDateSeparator\"></div>`;
         }
         builder += `<h3 class=\"commitGroupDate\">Commits on ${monthNames[dates[i].getMonth()]} ${dates[i].getDate()}, ${dates[i].getFullYear()}</h3>`;
-        lastDate = dates[i];
+        lastDate = resetHoursAndSmallerIntervals(dates[i]);
       }
       builder += buildCommitDiv(i);
     }
     return builder;
   });
+
+  function resetHoursAndSmallerIntervals(date) {
+    var d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
 
   function buildCommitDiv(index) {
     var builder = "";
