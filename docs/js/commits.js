@@ -1,5 +1,7 @@
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"];
+const millisOfMinute = 60000;
+const millisOfHour = 3600000;
 const millisOfADay = 86400000;
 const millisOfFourteenDays = 1209600000;
 
@@ -11,6 +13,11 @@ $.getJSON('https://api.github.com/repos/DunkleMango/StarboundModManager/commits'
   var authorsLink = [];
   var messages = [];
   for (var i = 0; i < count; i++) {
+    if (data[i].author == null || data[i].commit == null) {
+      i--;
+      count--;
+      continue;
+    }
     dates[i] = new Date(data[i].commit.author.date);
     authors[i] = data[i].author.login;
     authorsImg[i] = data[i].author.avatar_url;
@@ -48,7 +55,12 @@ $.getJSON('https://api.github.com/repos/DunkleMango/StarboundModManager/commits'
     var curDate = new Date();
     var dateDiff = getDateDifference(curDate, dates[index]);
     var diffDate = new Date(dateDiff);
-    if (dateDiff < millisOfADay) {
+
+    if (dateDiff < millisOfMinute) {
+      builder += `${diffDate.getSeconds()} seconds ago`
+    } else if (dateDiff < millisOfHour) {
+      builder += `${diffDate.getMinutes()} minutes ago`
+    } else if (dateDiff < millisOfADay) {
       builder += `${diffDate.getHours()} hours ago`;
     } else if (dateDiff < millisOfFourteenDays) {
       builder += `${diffDate.getDate()} days ago`;
