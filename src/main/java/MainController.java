@@ -2,6 +2,7 @@ import cache.CacheInformationProvider;
 import data.mod.ModData;
 import data.mod.ModDataManager;
 import data.mod.view.ModDataCell;
+import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.PieChart;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import settings.AppSettingsCoordinator;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -28,6 +30,7 @@ public class MainController implements Initializable {
     public Label steamDirectoryLabel;
     public Button steamDirectorySelectButton;
     public Button clearCacheButton;
+    public Button copySelectedButton;
     public ListView<ModData> workshopModsListView;
 
     //TODO find out what URL and ResourceBundle do in this context to meaningfully extend javadoc
@@ -91,11 +94,26 @@ public class MainController implements Initializable {
         steamDirectoryLabel.setText(dir.getAbsolutePath());
     }
 
+    public void onCopySelectedAction() {
+        ObservableList<ModData> selectedMods = getSelectedMods();
+        for (ModData mod : selectedMods) {
+            try {
+                mod.copyToServer();
+            } catch (IOException e) {
+                logger.error("Unable to copy \"{}\" mod to server, skipping to next..", mod.getId(), e);
+            }
+        }
+    }
+
     public void onClearCacheAction() {
         ModDataManager.getInstance().clearModsAndSavedData();
     }
 
     public void onWorkshopItemSelection() {
-        logger.debug("Current selection in workshop: {}", workshopModsListView.getSelectionModel().getSelectedItems());
+        logger.debug("Current selection in workshop: {}", getSelectedMods());
+    }
+
+    private ObservableList<ModData> getSelectedMods() {
+        return workshopModsListView.getSelectionModel().getSelectedItems();
     }
 }

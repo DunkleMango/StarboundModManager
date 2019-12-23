@@ -87,7 +87,7 @@
                                        </font>
                                     </Label>
                                     <ListView fx:id="workshopModsListView" onMouseClicked="#onWorkshopItemSelection" prefHeight="358.0" prefWidth="200.0" />
-                                    <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="copy selected">
+                                    <Button fx:id="copySelectedButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCopySelectedAction" text="copy selected">
                                        <VBox.margin>
                                           <Insets />
                                        </VBox.margin>

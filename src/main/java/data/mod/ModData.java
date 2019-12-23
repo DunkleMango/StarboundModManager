@@ -1,5 +1,6 @@
 package data.mod;
 
+import data.file.FileLocationCoordinator;
 import data.file.storage.ModDataFileManager;
 import data.mod.exception.ModDateException;
 import data.mod.exception.ModLoadingException;
@@ -12,8 +13,15 @@ import web.HTTPModRequestException;
 import web.SteamCommunicator;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public class ModData {
+    public static final String FILE_EXTENSION = ".pak";
     public static final String KEY_ID = "publishedfileid";
     public static final String KEY_PREVIEW_IMAGE_URL = "preview_url";
     public static final String KEY_TITLE = "title";
@@ -92,22 +100,42 @@ public class ModData {
         }
     }
 
-    public long getLastChangedWorkshop() throws ModDateException {
+    private File getWorkshopFile() {
         final File workshopDirectory = AppSettingsCoordinator.getInstance().getWorkshopDirectory();
-        return getLastChanged(workshopDirectory);
+        final FileLocationCoordinator flc = FileLocationCoordinator.getInstance();
+        return flc.getFile(workshopDirectory.getPath(), String.valueOf(this.getId()), "contents" + FILE_EXTENSION);
+    }
+
+    private File getServerFile() {
+        final File serverDirectory = AppSettingsCoordinator.getInstance().getServerModDirectory();
+        final FileLocationCoordinator flc = FileLocationCoordinator.getInstance();
+        return flc.getFile(serverDirectory.getPath(), String.valueOf(this.getId()) + FILE_EXTENSION);
+    }
+
+    public long getLastChangedWorkshop() throws ModDateException {
+        final File file = getWorkshopFile();
+        if (file == null) throw new ModDateException("No such file \"contents." + FILE_EXTENSION + "\" or dir \"" + this.getId() + "\" in the workshop directory");
+        return file.lastModified();
     }
 
     public long getLastChangedServerMod() throws ModDateException {
-        final File serverModDirectory = AppSettingsCoordinator.getInstance().getServerModDirectory();
-        return getLastChanged(serverModDirectory);
+        final File file = getServerFile();
+        if (file == null) throw new ModDateException("No such file " + this.getId() + FILE_EXTENSION + "\" in the server directory");
+        return file.lastModified();
     }
 
-    private long getLastChanged(File parentDir) throws ModDateException {
-        final File[] files = parentDir.listFiles((dir, name) -> dir.isDirectory()
-                && name.contentEquals(String.valueOf(getId())));
-        if (files == null || files.length < 1)
-            throw new ModDateException("Unable to retrieve date of \"last changed\" property of file");
-        final File targetDir = files[0];
-        return targetDir.lastModified();
+    public void copyToServer() throws IOException {
+        final File workshopFile = getWorkshopFile();
+        final File serverFile = getServerFile();
+        if (workshopFile == null || !workshopFile.exists() || serverFile == null) {
+            logger.info("mod \"{}\": unable to copy due to corrupted file-paths", this.getId());
+            return;
+        }
+        if (!isUpdateAvailable()) {
+            logger.info("mod \"{}\": server is up to date with workshop", this.getId());
+            return;
+        }
+        Files.copy(workshopFile.toPath(), serverFile.toPath());
+        logger.info("mod \"{}\": successfully copied from workshop to server", this.getId());
     }
 }
