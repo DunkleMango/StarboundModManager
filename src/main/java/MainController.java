@@ -111,6 +111,7 @@ public class MainController implements Initializable {
                 logger.error("Unable to copy \"{}\" mod to server, skipping to next..", mod.getId(), e);
             }
         }
+        ModDataManager.getInstance().updateView();
     }
 
     public void onClearCacheAction() {
