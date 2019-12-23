@@ -14,7 +14,9 @@ import web.SteamCommunicator;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class ModData {
     public static final String FILE_EXTENSION = ".pak";
@@ -131,7 +133,7 @@ public class ModData {
             logger.info("mod \"{}\": server is up to date with workshop", this.getId());
             return;
         }
-        Files.copy(workshopFile.toPath(), serverFile.toPath());
+        Files.copy(workshopFile.toPath(), serverFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         logger.info("mod \"{}\": successfully copied from workshop to server", this.getId());
     }
 }
