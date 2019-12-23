@@ -103,7 +103,7 @@ public final class AppSettingsCoordinator {
                 "steamapps", "workshop", "content", "211820");
     }
 
-    public File getServerModDirectory() {
+    public File getServerDirectory() {
         return FileLocationCoordinator.getInstance().getFile(getSteamDirectory().getAbsolutePath(),
                 "steamapps", "common", "Starbound", "mods");
     }

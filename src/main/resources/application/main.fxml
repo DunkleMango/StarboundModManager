@@ -101,7 +101,7 @@
                                           <Font size="24.0" />
                                        </font>
                                     </Label>
-                                    <ListView prefHeight="358.0" prefWidth="200.0" />
+                                    <ListView fx:id="serverModsListView" prefHeight="358.0" prefWidth="200.0" />
                                     <Button maxWidth="420.0" mnemonicParsing="false" text="update all" />
                                     <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="delete selected">
                                        <VBox.margin>

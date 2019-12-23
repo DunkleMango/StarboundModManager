@@ -15,10 +15,6 @@ import web.SteamCommunicator;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 public class ModData {
     public static final String FILE_EXTENSION = ".pak";
@@ -107,7 +103,7 @@ public class ModData {
     }
 
     private File getServerFile() {
-        final File serverDirectory = AppSettingsCoordinator.getInstance().getServerModDirectory();
+        final File serverDirectory = AppSettingsCoordinator.getInstance().getServerDirectory();
         final FileLocationCoordinator flc = FileLocationCoordinator.getInstance();
         return flc.getFile(serverDirectory.getPath(), String.valueOf(this.getId()) + FILE_EXTENSION);
     }

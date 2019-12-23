@@ -1,7 +1,6 @@
 package data.mod;
 
 import cache.CacheInformationProvider;
-import com.sun.javafx.collections.ObservableListWrapper;
 import data.file.FileLocationCoordinator;
 import data.file.storage.ModDataFileManager;
 import data.mod.exception.ModLoadingException;
@@ -14,8 +13,8 @@ import settings.AppSettingsCoordinator;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
 
 /**
  * Manages the loading and storing of mods from the Steam-API. Updates values if requested in the Controller or its subroutines.
@@ -28,12 +27,16 @@ import java.util.List;
 public final class ModDataManager {
     private static final Logger logger = LogManager.getLogger("ModDataManager");
     private static volatile ModDataManager instance;
-    private ObservableList<ModData> mods;
+    private HashMap<Long, ModData> modsCached;
+    private ObservableList<ModData> modsWorkshop;
+    private ObservableList<ModData> modsServer;
     // Synchronization locks
     private static final Object instanceLock = new Object();
 
     private ModDataManager() {
-        this.mods = FXCollections.observableArrayList();
+        this.modsCached = new HashMap<>();
+        this.modsWorkshop = FXCollections.observableArrayList();
+        this.modsServer = FXCollections.observableArrayList();
     }
 
     /**
@@ -54,15 +57,37 @@ public final class ModDataManager {
     }
 
     private void sortMods() {
-        this.mods.sort(new ModComparator());
+        this.modsWorkshop.sort(new ModComparator());
+        this.modsServer.sort(new ModComparator());
     }
 
     public void getMods() {
         loadModsFromCache();
-        loadModsFromWorkshopDirectory();
-        this.mods.forEach(modData -> {
+        updateView();
+        this.modsCached.values().forEach(modData -> {
             logger.debug("Loaded mod: id={}, title=\"{}\"", modData.getId(), modData.getTitle());
         });
+    }
+
+    public void updateView() {
+        loadModsFromWorkshopDirectory();
+        loadModsFromServerDirectory();
+    }
+
+    private void loadModsFromServerDirectory() {
+        AppSettingsCoordinator appSettingsCoordinator = AppSettingsCoordinator.getInstance();
+        final File serverDirectory = appSettingsCoordinator.getServerDirectory();
+        final File[] serverFiles = serverDirectory.listFiles((dir, name) -> name.endsWith(ModData.FILE_EXTENSION));
+        if (serverFiles != null && serverFiles.length > 0) {
+            for (File dir: serverFiles) {
+                logger.debug("Server-mod found: {}", dir.getName());
+                addModFromServer(dir);
+                sortMods(); //TODO only sort one
+            }
+            logger.debug("Server mods: {}", this.modsServer);
+        } else {
+            logger.debug("No server-mods found.");
+        }
     }
 
     private void loadModsFromWorkshopDirectory() {
@@ -73,25 +98,44 @@ public final class ModDataManager {
             for (File dir: workshopFiles) {
                 logger.debug("Workshop-mod found: {}", dir.getName());
                 addModFromWorkshop(dir);
-                sortMods();
+                sortMods(); //TODO only sort one
             }
-            logger.debug("Mods: {}", this.mods);
+            logger.debug("Workshop mods: {}", this.modsWorkshop);
         } else {
             logger.debug("No workshop-mods found.");
+        }
+    }
+
+    private void addModFromServer(File dir) {
+        String dirName = dir.getName();
+        String idStr = dirName.substring(0, dirName.length() - ModData.FILE_EXTENSION.length());
+        long id = Long.parseLong(idStr);
+        try {
+            if (this.modsCached.containsKey(id)) {
+                logger.debug("Mod already in memory.");
+            } else {
+                this.modsCached.put(id, new ModData(id));
+            }
+        } catch (ModLoadingException e) {
+            logger.error("Failed to load mod: {}", id, e);
+        } finally {
+            this.modsServer.add(modsCached.get(id));
         }
     }
 
     private void addModFromWorkshop(File dir) {
         String idStr = dir.getName();
         long id = Long.parseLong(idStr);
-        if (this.mods.stream().anyMatch(modData -> modData.getId() == id)) {
-            logger.debug("Mod already in memory.");
-            return;
-        }
         try {
-            this.mods.add(new ModData(id));
+            if (this.modsCached.containsKey(id)) {
+                logger.debug("Mod already in memory.");
+            } else {
+                this.modsCached.put(id, new ModData(id));
+            }
         } catch (ModLoadingException e) {
             logger.error("Failed to load mod: {}", id, e);
+        } finally {
+            this.modsWorkshop.add(modsCached.get(id));
         }
     }
 
@@ -100,7 +144,10 @@ public final class ModDataManager {
         try {
             File cacheFile = FileLocationCoordinator.getInstance().createAndGetCacheFile();
             ModDataFileManager fileManager = new ModDataFileManager();
-            this.mods.addAll(fileManager.load(cacheFile));
+            Collection<ModData> modsLoaded = fileManager.load(cacheFile);
+            for (ModData mod: modsLoaded) {
+                this.modsCached.put(mod.getId(), mod);
+            }
             cacheInformationProvider.loadCacheStatistics();
             sortMods();
             logger.debug("Successfully loaded mods.");
@@ -110,9 +157,10 @@ public final class ModDataManager {
     }
 
     public void clearModsAndSavedData() {
-        this.mods.clear();
+        this.modsCached.clear();
+        this.modsWorkshop.clear();
+        this.modsServer.clear();
         saveModsToCache();
-        loadModsFromCache();
         getMods();
     }
 
@@ -121,7 +169,7 @@ public final class ModDataManager {
             FileLocationCoordinator dlc = FileLocationCoordinator.getInstance();
             final File cacheFile = dlc.createAndGetCacheFile();
             ModDataFileManager fileManager = new ModDataFileManager();
-            fileManager.store(cacheFile, this.mods);
+            fileManager.store(cacheFile, this.modsCached.values());
             logger.debug("Successfully stored mods.");
         } catch (IOException e) {
             logger.debug("Failed to store mods. Discarding.", e);
@@ -129,6 +177,10 @@ public final class ModDataManager {
     }
 
     public void setWorkshopModsListView(ListView<ModData> workshopModsListView) {
-        workshopModsListView.setItems(this.mods);
+        workshopModsListView.setItems(this.modsWorkshop);
+    }
+
+    public void setServerModsListView(ListView<ModData> serverModsListView) {
+        serverModsListView.setItems(this.modsServer);
     }
 }

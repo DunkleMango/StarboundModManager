@@ -32,6 +32,7 @@ public class MainController implements Initializable {
     public Button clearCacheButton;
     public Button copySelectedButton;
     public ListView<ModData> workshopModsListView;
+    public ListView<ModData> serverModsListView;
 
     //TODO find out what URL and ResourceBundle do in this context to meaningfully extend javadoc
 
@@ -48,10 +49,17 @@ public class MainController implements Initializable {
         CacheInformationProvider cacheInformationProvider = CacheInformationProvider.getInstance();
         cacheInformationProvider.linkStatistics(cachePieChart);
 
+
         ModDataManager modDataManager = ModDataManager.getInstance();
+
         workshopModsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         workshopModsListView.setCellFactory(modDataListView -> new ModDataCell());
         modDataManager.setWorkshopModsListView(workshopModsListView);
+
+        serverModsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        serverModsListView.setCellFactory(modDataListView -> new ModDataCell());
+        modDataManager.setServerModsListView(serverModsListView);
+
         modDataManager.getMods();
     }
 
