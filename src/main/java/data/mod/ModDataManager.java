@@ -56,9 +56,8 @@ public final class ModDataManager {
         return instance;
     }
 
-    private void sortMods() {
-        this.modsWorkshop.sort(new ModComparator());
-        this.modsServer.sort(new ModComparator());
+    private void sortMods(ObservableList<ModData> target) {
+        target.sort(new ModComparator());
     }
 
     public void getMods() {
@@ -70,6 +69,8 @@ public final class ModDataManager {
     }
 
     public void updateView() {
+        this.modsWorkshop.clear();
+        this.modsServer.clear();
         loadModsFromWorkshopDirectory();
         loadModsFromServerDirectory();
     }
@@ -82,7 +83,7 @@ public final class ModDataManager {
             for (File dir: serverFiles) {
                 logger.debug("Server-mod found: {}", dir.getName());
                 addModFromServer(dir);
-                sortMods(); //TODO only sort one
+                sortMods(modsServer);
             }
             logger.debug("Server mods: {}", this.modsServer);
         } else {
@@ -98,7 +99,7 @@ public final class ModDataManager {
             for (File dir: workshopFiles) {
                 logger.debug("Workshop-mod found: {}", dir.getName());
                 addModFromWorkshop(dir);
-                sortMods(); //TODO only sort one
+                sortMods(modsWorkshop);
             }
             logger.debug("Workshop mods: {}", this.modsWorkshop);
         } else {
@@ -149,7 +150,6 @@ public final class ModDataManager {
                 this.modsCached.put(mod.getId(), mod);
             }
             cacheInformationProvider.loadCacheStatistics();
-            sortMods();
             logger.debug("Successfully loaded mods.");
         } catch (IOException e) {
             logger.error("Failed to load mods. Continuing without mods.",e);
@@ -158,8 +158,6 @@ public final class ModDataManager {
 
     public void clearModsAndSavedData() {
         this.modsCached.clear();
-        this.modsWorkshop.clear();
-        this.modsServer.clear();
         saveModsToCache();
         getMods();
     }
