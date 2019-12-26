@@ -122,18 +122,30 @@ public class ModData {
         return file.lastModified();
     }
 
-    public void copyToServer() throws IOException {
+    public boolean copyToServer() throws IOException {
         final File workshopFile = getWorkshopFile();
         final File serverFile = getServerFile();
         if (workshopFile == null || !workshopFile.exists() || serverFile == null) {
             logger.info("mod \"{}\": unable to copy due to corrupted file-paths", this.getId());
-            return;
+            return false;
         }
         if (!isUpdateAvailable()) {
             logger.info("mod \"{}\": server is up to date with workshop", this.getId());
-            return;
+            return false;
         }
         Files.copy(workshopFile.toPath(), serverFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         logger.info("mod \"{}\": successfully copied from workshop to server", this.getId());
+        return true;
+    }
+
+    public boolean deleteServerSide() throws IOException {
+        final File serverFile = getServerFile();
+        if (serverFile == null) {
+            logger.info("mod \"{}\": unable to delete due to corrupted file-paths", this.getId());
+            return false;
+        }
+        Files.delete(serverFile.toPath());
+        logger.info("mod \"{}\": successfully deleted from server", this.getId());
+        return true;
     }
 }

@@ -16,6 +16,7 @@ import settings.AppSettingsCoordinator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 /**
@@ -31,6 +32,8 @@ public class MainController implements Initializable {
     public Button steamDirectorySelectButton;
     public Button clearCacheButton;
     public Button copySelectedButton;
+    public Button updateAllButton;
+    public Button deleteSelectedButton;
     public ListView<ModData> workshopModsListView;
     public ListView<ModData> serverModsListView;
 
@@ -103,15 +106,53 @@ public class MainController implements Initializable {
     }
 
     public void onCopySelectedAction() {
-        ObservableList<ModData> selectedMods = getSelectedMods();
+        ObservableList<ModData> selectedMods = getSelectedModsWorkshop();
+        if (selectedMods.size() == 0) return;
         for (ModData mod : selectedMods) {
             try {
-                mod.copyToServer();
+                boolean successful = mod.copyToServer();
+                logger.info("Copying file {}({}) was {}successful", mod.getId(), mod.getTitle(), successful ? "" : "not ");
             } catch (IOException e) {
                 logger.error("Unable to copy \"{}\" mod to server, skipping to next..", mod.getId(), e);
             }
         }
+        logger.info("Copied mods from workshop to server: {}", selectedMods);
         ModDataManager.getInstance().updateView();
+    }
+
+    public void onUpdateServerModsAction() {
+        ModDataManager.getInstance().updateServerModsData();
+    }
+
+    public void onDeleteServerModsAction() {
+        ObservableList<ModData> selectedMods = getSelectedModsServer();
+        if (selectedMods.size() == 0) return;
+        // check if the user actually wanted to delete the mods server-side
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Deleting mods!");
+        alert.setHeaderText("Confirm the deletion of the following selected mods from the server!");
+        StringBuilder builder = new StringBuilder();
+        for (ModData mod : selectedMods) {
+            builder.append(mod.getTitle());
+            builder.append(" (");
+            builder.append(mod.getId());
+            builder.append(")\n");
+        }
+        alert.setContentText(builder.toString());
+        Optional<ButtonType> alertResult = alert.showAndWait();
+        if (alertResult.get() == ButtonType.OK) {
+            // delete the mods after confirmation by the user
+            for (ModData mod : selectedMods) {
+                try {
+                    boolean successful = mod.deleteServerSide();
+                    logger.info("Copying file {}({}) was {}successful", mod.getId(), mod.getTitle(), successful ? "" : "not ");
+                } catch (IOException e) {
+                    logger.error("Unable to delete \"{}\" mod from server, skipping to next..", mod.getId(), e);
+                }
+            }
+            logger.info("Deleted mods from server: {}", selectedMods);
+            ModDataManager.getInstance().updateView();
+        }
     }
 
     public void onClearCacheAction() {
@@ -119,10 +160,18 @@ public class MainController implements Initializable {
     }
 
     public void onWorkshopItemSelection() {
-        logger.debug("Current selection in workshop: {}", getSelectedMods());
+        logger.debug("Current selection in workshop: {}", getSelectedModsWorkshop());
     }
 
-    private ObservableList<ModData> getSelectedMods() {
+    public void onServerItemSelection() {
+        logger.debug("Current selection in server: {}", getSelectedModsServer());
+    }
+
+    private ObservableList<ModData> getSelectedModsWorkshop() {
         return workshopModsListView.getSelectionModel().getSelectedItems();
+    }
+
+    private ObservableList<ModData> getSelectedModsServer() {
+        return serverModsListView.getSelectionModel().getSelectedItems();
     }
 }

@@ -101,9 +101,9 @@
                                           <Font size="24.0" />
                                        </font>
                                     </Label>
-                                    <ListView fx:id="serverModsListView" prefHeight="358.0" prefWidth="200.0" />
-                                    <Button maxWidth="420.0" mnemonicParsing="false" text="update all" />
-                                    <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="delete selected">
+                                    <ListView fx:id="serverModsListView" onMouseClicked="#onServerItemSelection" prefHeight="358.0" prefWidth="200.0" />
+                                    <Button fx:id="updateAllButton" maxWidth="420.0" mnemonicParsing="false" onAction="#onUpdateServerModsAction" text="update all" />
+                                    <Button fx:id="deleteSelectedButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onDeleteServerModsAction" text="delete selected">
                                        <VBox.margin>
                                           <Insets />
                                        </VBox.margin>

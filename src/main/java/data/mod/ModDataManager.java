@@ -174,6 +174,20 @@ public final class ModDataManager {
         }
     }
 
+    public void updateServerModsData() {
+        if (this.modsServer.size() == 0) return;
+        for (ModData mod: this.modsServer) {
+            try {
+                boolean successful = mod.copyToServer();
+                logger.info("Copying file {}({}) was {}successful", mod.getId(), mod.getTitle(), successful ? "" : "not ");
+            } catch (IOException e) {
+                logger.error("Unable to copy \"{}\" mod to server, skipping to next..", mod.getId(), e);
+            }
+        }
+        logger.info("Copied mods from workshop to server: {}", this.modsServer);
+        updateView();
+    }
+
     public void setWorkshopModsListView(ListView<ModData> workshopModsListView) {
         workshopModsListView.setItems(this.modsWorkshop);
     }
