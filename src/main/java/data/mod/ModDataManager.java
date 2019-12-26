@@ -6,6 +6,7 @@ import data.file.storage.ModDataFileManager;
 import data.mod.exception.ModLoadingException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.scene.control.ListView;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.function.Predicate;
 
 /**
  * Manages the loading and storing of mods from the Steam-API. Updates values if requested in the Controller or its subroutines.
@@ -30,6 +32,8 @@ public final class ModDataManager {
     private HashMap<Long, ModData> modsCached;
     private ObservableList<ModData> modsWorkshop;
     private ObservableList<ModData> modsServer;
+    private FilteredList<ModData> modsWorkshopFiltered;
+    private FilteredList<ModData> modsServerFiltered;
     // Synchronization locks
     private static final Object instanceLock = new Object();
 
@@ -37,6 +41,8 @@ public final class ModDataManager {
         this.modsCached = new HashMap<>();
         this.modsWorkshop = FXCollections.observableArrayList();
         this.modsServer = FXCollections.observableArrayList();
+        this.modsWorkshopFiltered = new FilteredList<>(this.modsWorkshop);
+        this.modsServerFiltered = new FilteredList<>(this.modsServer);
     }
 
     /**
@@ -54,6 +60,11 @@ public final class ModDataManager {
             }
         }
         return instance;
+    }
+
+    public void setModFilter(Predicate<? super ModData> predicate) {
+        this.modsWorkshopFiltered.setPredicate(predicate);
+        this.modsServerFiltered.setPredicate(predicate);
     }
 
     private void sortMods(ObservableList<ModData> target) {
@@ -189,10 +200,10 @@ public final class ModDataManager {
     }
 
     public void setWorkshopModsListView(ListView<ModData> workshopModsListView) {
-        workshopModsListView.setItems(this.modsWorkshop);
+        workshopModsListView.setItems(this.modsWorkshopFiltered);
     }
 
     public void setServerModsListView(ListView<ModData> serverModsListView) {
-        serverModsListView.setItems(this.modsServer);
+        serverModsListView.setItems(this.modsServerFiltered);
     }
 }

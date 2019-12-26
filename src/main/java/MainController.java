@@ -2,7 +2,9 @@ import cache.CacheInformationProvider;
 import data.mod.ModData;
 import data.mod.ModDataManager;
 import data.mod.view.ModDataCell;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.Event;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.PieChart;
@@ -16,6 +18,7 @@ import settings.AppSettingsCoordinator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -36,6 +39,7 @@ public class MainController implements Initializable {
     public Button deleteSelectedButton;
     public ListView<ModData> workshopModsListView;
     public ListView<ModData> serverModsListView;
+    public TextField modSearchBar;
 
     //TODO find out what URL and ResourceBundle do in this context to meaningfully extend javadoc
 
@@ -52,8 +56,15 @@ public class MainController implements Initializable {
         CacheInformationProvider cacheInformationProvider = CacheInformationProvider.getInstance();
         cacheInformationProvider.linkStatistics(cachePieChart);
 
-
         ModDataManager modDataManager = ModDataManager.getInstance();
+        modSearchBar.textProperty().addListener((observableValue, s, t1) -> {
+            String filter = modSearchBar.getText().toLowerCase();
+            if (filter == null || filter.length() == 0) {
+                modDataManager.setModFilter(modData -> true);
+            } else {
+                modDataManager.setModFilter(modData -> modData.getTitle().toLowerCase().contains(filter));
+            }
+        });
 
         workshopModsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         workshopModsListView.setCellFactory(modDataListView -> new ModDataCell());

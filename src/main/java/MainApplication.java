@@ -3,6 +3,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.SceneAntialiasing;
 import javafx.stage.Stage;
 import settings.AppSettingsCoordinator;
 
@@ -21,7 +22,7 @@ public class MainApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("application/main.fxml"));
-        Scene scene = new Scene(root);
+        Scene scene = new Scene(root, 600, 640, false, SceneAntialiasing.BALANCED);
         stage.setScene(scene);
         stage.show();
         stage.setOnCloseRequest(event -> {
