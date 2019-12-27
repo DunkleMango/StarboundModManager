@@ -71,7 +71,8 @@ public final class ModDataManager {
         target.sort(new ModComparator());
     }
 
-    public void getMods() {
+    public void initiallyLoadMods() {
+        logger.debug("Initially loading mods..");
         loadModsFromCache();
         reloadMods();
         this.modsCached.values().forEach(modData -> {
@@ -80,6 +81,7 @@ public final class ModDataManager {
     }
 
     public void reloadMods() {
+        logger.debug("Reloading mods..");
         this.modsWorkshop.clear();
         this.modsServer.clear();
         loadModsFromWorkshopDirectory();
@@ -152,6 +154,7 @@ public final class ModDataManager {
     }
 
     private void loadModsFromCache() {
+        logger.debug("Loading mods from cache..");
         CacheInformationProvider cacheInformationProvider = CacheInformationProvider.getInstance();
         try {
             File cacheFile = FileLocationCoordinator.getInstance().createAndGetCacheFile();
@@ -165,12 +168,13 @@ public final class ModDataManager {
         } catch (IOException e) {
             logger.error("Failed to load mods. Continuing without mods.",e);
         }
+        logger.debug("Loading mods from cache complete!");
     }
 
     public void clearModsAndSavedData() {
         this.modsCached.clear();
         saveModsToCache();
-        getMods();
+        initiallyLoadMods();
     }
 
     public void saveModsToCache() {

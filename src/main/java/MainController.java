@@ -50,13 +50,15 @@ public class MainController implements Initializable {
         AppSettingsCoordinator asc = AppSettingsCoordinator.getInstance();
         steamDirectoryLabel.setText(asc.getSteamDirectory().getAbsolutePath());
 
-        boolean isHealthy = checkFSIntegrity();
-        updateUIHealthMode(isHealthy);
-
         CacheInformationProvider cacheInformationProvider = CacheInformationProvider.getInstance();
         cacheInformationProvider.linkStatistics(cachePieChart);
 
         ModDataManager modDataManager = ModDataManager.getInstance();
+        modDataManager.initiallyLoadMods();
+
+        boolean isHealthy = checkFSIntegrity();
+        updateUIHealthMode(isHealthy);
+
         modSearchBar.textProperty().addListener((observableValue, s, t1) -> {
             String filter = modSearchBar.getText().toLowerCase();
             if (filter.length() == 0) {
@@ -73,12 +75,11 @@ public class MainController implements Initializable {
         serverModsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         serverModsListView.setCellFactory(modDataListView -> new ModDataCell());
         modDataManager.setServerModsListView(serverModsListView);
-
-        modDataManager.reloadMods();
     }
 
     private void updateUIHealthMode(boolean isHealthy) {
         modControlTab.setDisable(!isHealthy);
+        if (isHealthy) ModDataManager.getInstance().reloadMods();
     }
 
     private boolean checkFSIntegrity() {
