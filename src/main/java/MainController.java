@@ -79,7 +79,6 @@ public class MainController implements Initializable {
 
     private void updateUIHealthMode(boolean isHealthy) {
         modControlTab.setDisable(!isHealthy);
-        if (isHealthy) ModDataManager.getInstance().reloadMods();
     }
 
     private boolean checkFSIntegrity() {
@@ -156,6 +155,7 @@ public class MainController implements Initializable {
 
         boolean isHealthy = checkFSIntegrity();
         updateUIHealthMode(isHealthy);
+        if (isHealthy) ModDataManager.getInstance().reloadMods();
     }
 
     public void onCopySelectedAction() {
