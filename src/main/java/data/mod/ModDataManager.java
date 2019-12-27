@@ -73,13 +73,13 @@ public final class ModDataManager {
 
     public void getMods() {
         loadModsFromCache();
-        updateView();
+        reloadMods();
         this.modsCached.values().forEach(modData -> {
             logger.debug("Loaded mod: id={}, title=\"{}\"", modData.getId(), modData.getTitle());
         });
     }
 
-    public void updateView() {
+    public void reloadMods() {
         this.modsWorkshop.clear();
         this.modsServer.clear();
         loadModsFromWorkshopDirectory();
@@ -196,7 +196,7 @@ public final class ModDataManager {
             }
         }
         logger.info("Copied mods from workshop to server: {}", this.modsServer);
-        updateView();
+        reloadMods();
     }
 
     public void setWorkshopModsListView(ListView<ModData> workshopModsListView) {

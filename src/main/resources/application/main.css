@@ -11,7 +11,7 @@
 .button {
   -fx-background-color: -fx-vars-button-background-color;
   -fx-background-radius: 2px;
-  -fx-font-size: 1.3em;
+  -fx-font-size: 1.4em;
   -fx-text-fill: white;
   -fx-label-padding: 2px;
   -fx-effect: dropshadow(three-pass-box,

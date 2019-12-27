@@ -2,9 +2,7 @@ import cache.CacheInformationProvider;
 import data.mod.ModData;
 import data.mod.ModDataManager;
 import data.mod.view.ModDataCell;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.Event;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.PieChart;
@@ -18,7 +16,6 @@ import settings.AppSettingsCoordinator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -53,13 +50,16 @@ public class MainController implements Initializable {
         AppSettingsCoordinator asc = AppSettingsCoordinator.getInstance();
         steamDirectoryLabel.setText(asc.getSteamDirectory().getAbsolutePath());
 
+        boolean isHealthy = checkFSIntegrity();
+        updateUIHealthMode(isHealthy);
+
         CacheInformationProvider cacheInformationProvider = CacheInformationProvider.getInstance();
         cacheInformationProvider.linkStatistics(cachePieChart);
 
         ModDataManager modDataManager = ModDataManager.getInstance();
         modSearchBar.textProperty().addListener((observableValue, s, t1) -> {
             String filter = modSearchBar.getText().toLowerCase();
-            if (filter == null || filter.length() == 0) {
+            if (filter.length() == 0) {
                 modDataManager.setModFilter(modData -> true);
             } else {
                 modDataManager.setModFilter(modData -> modData.getTitle().toLowerCase().contains(filter));
@@ -74,7 +74,45 @@ public class MainController implements Initializable {
         serverModsListView.setCellFactory(modDataListView -> new ModDataCell());
         modDataManager.setServerModsListView(serverModsListView);
 
-        modDataManager.getMods();
+        modDataManager.reloadMods();
+    }
+
+    private void updateUIHealthMode(boolean isHealthy) {
+        modControlTab.setDisable(!isHealthy);
+    }
+
+    private boolean checkFSIntegrity() {
+        AppSettingsCoordinator asc = AppSettingsCoordinator.getInstance();
+        String alertTitle = "ERROR: Unable to find Starbound!";
+        String alertContentText = "Please select the correct steam directory and try again.";
+        File steamDir = asc.getSteamDirectory();
+        if (!steamDir.exists()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(alertTitle);
+            alert.setHeaderText("The steam directory under \"" + steamDir.getAbsolutePath() + "\" could not be found.");
+            alert.setContentText(alertContentText);
+            alert.showAndWait();
+            return false;
+        }
+        File workshopDir = asc.getWorkshopDirectory();
+        if (!workshopDir.exists()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(alertTitle);
+            alert.setHeaderText("The Starbound workshop directory under \"" + workshopDir.getAbsolutePath() + "\" could not be found.");
+            alert.setContentText(alertContentText);
+            alert.showAndWait();
+            return false;
+        }
+        File serverDir = asc.getServerDirectory();
+        if (!serverDir.exists()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle(alertTitle);
+            alert.setHeaderText("The Starbound server directory under \"" + serverDir.getAbsolutePath() + "\" could not be found.");
+            alert.setContentText(alertContentText);
+            alert.showAndWait();
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -114,6 +152,9 @@ public class MainController implements Initializable {
         AppSettingsCoordinator appSettingsCoordinator = AppSettingsCoordinator.getInstance();
         appSettingsCoordinator.setSteamDirectory(dir);
         steamDirectoryLabel.setText(dir.getAbsolutePath());
+
+        boolean isHealthy = checkFSIntegrity();
+        updateUIHealthMode(isHealthy);
     }
 
     public void onCopySelectedAction() {
@@ -128,7 +169,7 @@ public class MainController implements Initializable {
             }
         }
         logger.info("Copied mods from workshop to server: {}", selectedMods);
-        ModDataManager.getInstance().updateView();
+        ModDataManager.getInstance().reloadMods();
     }
 
     public void onUpdateServerModsAction() {
@@ -162,7 +203,7 @@ public class MainController implements Initializable {
                 }
             }
             logger.info("Deleted mods from server: {}", selectedMods);
-            ModDataManager.getInstance().updateView();
+            ModDataManager.getInstance().reloadMods();
         }
     }
 
