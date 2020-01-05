@@ -4,6 +4,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import settings.AppSettingsCoordinator;
 
@@ -22,6 +23,7 @@ public class MainApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("application/main.fxml"));
+        stage.getIcons().add(new Image(this.getClass().getResource("application/icon.png").toString()));
         Scene scene = new Scene(root, 600, 640, false, SceneAntialiasing.BALANCED);
         stage.setScene(scene);
         stage.show();
