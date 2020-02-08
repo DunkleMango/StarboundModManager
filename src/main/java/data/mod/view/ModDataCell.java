@@ -2,15 +2,11 @@ package data.mod.view;
 
 import data.mod.ModData;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 
 public class ModDataCell extends ListCell<ModData> {
     private HBox hBox = new HBox();

@@ -14,7 +14,6 @@ import web.SteamCommunicator;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
@@ -122,28 +121,24 @@ public class ModData {
         return file.lastModified();
     }
 
-    public boolean copyToServer() throws IOException {
+    public synchronized boolean copyToServer() throws IOException {
         final File workshopFile = getWorkshopFile();
         final File serverFile = getServerFile();
-        if (workshopFile == null || !workshopFile.exists() || serverFile == null) {
+        if (!workshopFile.exists()) {
             logger.info("mod \"{}\": unable to copy due to corrupted file-paths", this.getId());
             return false;
         }
         if (!isUpdateAvailable()) {
             logger.info("mod \"{}\": server is up to date with workshop", this.getId());
-            return false;
+            return true;
         }
         Files.copy(workshopFile.toPath(), serverFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         logger.info("mod \"{}\": successfully copied from workshop to server", this.getId());
         return true;
     }
 
-    public boolean deleteServerSide() throws IOException {
+    public synchronized boolean deleteServerSide() throws IOException {
         final File serverFile = getServerFile();
-        if (serverFile == null) {
-            logger.info("mod \"{}\": unable to delete due to corrupted file-paths", this.getId());
-            return false;
-        }
         Files.delete(serverFile.toPath());
         logger.info("mod \"{}\": successfully deleted from server", this.getId());
         return true;

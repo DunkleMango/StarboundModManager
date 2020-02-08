@@ -9,7 +9,6 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.effect.GaussianBlur?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -94,9 +93,6 @@
                                  <image>
                                     <Image url="@magnifying_glass_right.png" />
                                  </image>
-                                 <effect>
-                                    <GaussianBlur radius="1.75" />
-                                 </effect>
                               </ImageView>
                            </children>
                            <padding>

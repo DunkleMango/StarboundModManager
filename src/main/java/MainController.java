@@ -2,12 +2,20 @@ import cache.CacheInformationProvider;
 import data.mod.ModData;
 import data.mod.ModDataManager;
 import data.mod.view.ModDataCell;
+import dialog.filesystemaction.ActionType;
+import dialog.filesystemaction.FSADialogController;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +24,6 @@ import settings.AppSettingsCoordinator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 /**
@@ -158,54 +165,43 @@ public class MainController implements Initializable {
         if (isHealthy) ModDataManager.getInstance().reloadMods();
     }
 
-    public void onCopySelectedAction() {
-        ObservableList<ModData> selectedMods = getSelectedModsWorkshop();
-        if (selectedMods.size() == 0) return;
-        for (ModData mod : selectedMods) {
-            try {
-                boolean successful = mod.copyToServer();
-                logger.info("Copying file {}({}) was {}successful", mod.getId(), mod.getTitle(), successful ? "" : "not ");
-            } catch (IOException e) {
-                logger.error("Unable to copy \"{}\" mod to server, skipping to next..", mod.getId(), e);
-            }
+    public void showFSADialogAndReloadMods(ObservableList<ModData> mods, ActionType actionType) {
+        final Stage stage = new Stage();
+        stage.getIcons().add(new Image(this.getClass().getResource("application/icon.png").toString()));
+        Parent root = null;
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("application/dialog_filesystemaction.fxml"));
+            root = loader.load();
+            FSADialogController dialogController = loader.<FSADialogController>getController();
+            dialogController.supplyData(mods, actionType);
+        } catch (IOException e) {
+            logger.error("Unable to load dialog_filesystemaction.fxml");
+            return;
         }
-        logger.info("Copied mods from workshop to server: {}", selectedMods);
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.showAndWait();
+
         ModDataManager.getInstance().reloadMods();
     }
 
+    public void onCopySelectedAction() {
+        ObservableList<ModData> mods = getSelectedModsWorkshop();
+        showFSADialogAndReloadMods(mods, ActionType.COPY);
+        logger.info("Copied mods from workshop to server: {}", mods);
+    }
+
     public void onUpdateServerModsAction() {
-        ModDataManager.getInstance().updateServerModsData();
+        ObservableList<ModData> mods = getModsServer();
+        showFSADialogAndReloadMods(mods, ActionType.COPY);
+        logger.info("Updated server mods via workshop: {}", mods);
     }
 
     public void onDeleteServerModsAction() {
-        ObservableList<ModData> selectedMods = getSelectedModsServer();
-        if (selectedMods.size() == 0) return;
-        // check if the user actually wanted to delete the mods server-side
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Deleting mods!");
-        alert.setHeaderText("Confirm the deletion of the following selected mods from the server!");
-        StringBuilder builder = new StringBuilder();
-        for (ModData mod : selectedMods) {
-            builder.append(mod.getTitle());
-            builder.append(" (");
-            builder.append(mod.getId());
-            builder.append(")\n");
-        }
-        alert.setContentText(builder.toString());
-        Optional<ButtonType> alertResult = alert.showAndWait();
-        if (alertResult.get() == ButtonType.OK) {
-            // delete the mods after confirmation by the user
-            for (ModData mod : selectedMods) {
-                try {
-                    boolean successful = mod.deleteServerSide();
-                    logger.info("Copying file {}({}) was {}successful", mod.getId(), mod.getTitle(), successful ? "" : "not ");
-                } catch (IOException e) {
-                    logger.error("Unable to delete \"{}\" mod from server, skipping to next..", mod.getId(), e);
-                }
-            }
-            logger.info("Deleted mods from server: {}", selectedMods);
-            ModDataManager.getInstance().reloadMods();
-        }
+        ObservableList<ModData> mods = getSelectedModsServer();
+        showFSADialogAndReloadMods(mods, ActionType.DELETE);
+        logger.info("Deleted mods from server: {}", mods);
     }
 
     public void onClearCacheAction() {
@@ -226,5 +222,9 @@ public class MainController implements Initializable {
 
     private ObservableList<ModData> getSelectedModsServer() {
         return serverModsListView.getSelectionModel().getSelectedItems();
+    }
+
+    private ObservableList<ModData> getModsServer() {
+        return serverModsListView.getItems();
     }
 }

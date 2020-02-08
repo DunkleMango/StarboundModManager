@@ -17,8 +17,8 @@
    sodipodi:docname="magnifying_glass_right.svg"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
    inkscape:export-filename="C:\Github\StarboundModManager\src\main\resources\application\magnifying_glass_right.png"
-   inkscape:export-xdpi="1536"
-   inkscape:export-ydpi="1536">
+   inkscape:export-xdpi="72"
+   inkscape:export-ydpi="72">
   <defs
      id="defs815">
     <marker
@@ -71,8 +71,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="22.627417"
-     inkscape:cx="6.4118143"
-     inkscape:cy="9.3214212"
+     inkscape:cx="13.460785"
+     inkscape:cy="15.641188"
      inkscape:document-units="px"
      inkscape:current-layer="g1757"
      showgrid="false"
@@ -93,7 +93,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
