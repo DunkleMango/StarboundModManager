@@ -33,6 +33,7 @@ import java.util.ResourceBundle;
 public class MainController implements Initializable {
     private static Logger logger = LogManager.getLogger("MainController");
     public PieChart cachePieChart;
+    public TabPane rootTabPane;
     public Tab settingsTab;
     public Tab modControlTab;
     public Label steamDirectoryLabel;
@@ -86,6 +87,9 @@ public class MainController implements Initializable {
 
     private void updateUIHealthMode(boolean isHealthy) {
         modControlTab.setDisable(!isHealthy);
+        if (isHealthy) {
+            rootTabPane.getSelectionModel().select(modControlTab);
+        }
     }
 
     private boolean checkFSIntegrity() {
