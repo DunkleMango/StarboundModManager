@@ -77,7 +77,6 @@ public class MainController implements Initializable {
         // Mod-Control
         // --> Configurations
         configurationsListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        configurationsListView.setEditable(true);
         configurationsListView.setCellFactory(modConfigListView -> new ServerConfigCell());
         ObservableList<ServerConfig> items = FXCollections.observableArrayList();
         items.add(new ServerConfig("server 1"));

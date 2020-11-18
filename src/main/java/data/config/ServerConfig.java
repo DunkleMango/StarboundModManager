@@ -33,4 +33,8 @@ public class ServerConfig {
     public void addMod(Long modId) {
         this.modIds.add(modId);
     }
+
+    public void rename(String name) {
+        this.name = name;
+    }
 }
