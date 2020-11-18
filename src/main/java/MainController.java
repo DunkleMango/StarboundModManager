@@ -1,9 +1,12 @@
 import cache.CacheInformationProvider;
+import data.config.ServerConfig;
+import data.config.view.ServerConfigCell;
 import data.mod.ModData;
 import data.mod.ModDataManager;
 import data.mod.view.ModDataCell;
 import dialog.filesystemaction.ActionType;
 import dialog.filesystemaction.FSADialogController;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXMLLoader;
@@ -32,6 +35,7 @@ import java.util.ResourceBundle;
  */
 public class MainController implements Initializable {
     private static Logger logger = LogManager.getLogger("MainController");
+    // Settings
     public PieChart cachePieChart;
     public TabPane rootTabPane;
     public Tab settingsTab;
@@ -39,9 +43,17 @@ public class MainController implements Initializable {
     public Label steamDirectoryLabel;
     public Button steamDirectorySelectButton;
     public Button clearCacheButton;
-    public Button copySelectedButton;
-    public Button updateAllButton;
-    public Button deleteSelectedButton;
+    // Mod-Control
+    // --> Configurations
+    public Button createNewConfigButton;
+    public Button deleteSelectedConfigButton;
+    public Button exportSelectedConfigButton;
+    public Button importConfigButton;
+    public ListView<ServerConfig> configurationsListView;
+    // --> Mods
+    public Button copySelectedModButton;
+    public Button updateAllModsButton;
+    public Button deleteSelectedModButton;
     public ListView<ModData> workshopModsListView;
     public ListView<ModData> serverModsListView;
     public TextField modSearchBar;
@@ -55,12 +67,24 @@ public class MainController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // Settings
         AppSettingsCoordinator asc = AppSettingsCoordinator.getInstance();
         steamDirectoryLabel.setText(asc.getSteamDirectory().getAbsolutePath());
 
         CacheInformationProvider cacheInformationProvider = CacheInformationProvider.getInstance();
         cacheInformationProvider.linkStatistics(cachePieChart);
 
+        // Mod-Control
+        // --> Configurations
+        configurationsListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        configurationsListView.setEditable(true);
+        configurationsListView.setCellFactory(modConfigListView -> new ServerConfigCell());
+        ObservableList<ServerConfig> items = FXCollections.observableArrayList();
+        items.add(new ServerConfig("server 1"));
+        items.add(new ServerConfig("server 2"));
+        configurationsListView.setItems(items);
+
+        // --> Mods
         ModDataManager modDataManager = ModDataManager.getInstance();
         modDataManager.initiallyLoadMods();
 

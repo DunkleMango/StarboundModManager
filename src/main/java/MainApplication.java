@@ -24,7 +24,7 @@ public class MainApplication extends Application {
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("application/main.fxml"));
         stage.getIcons().add(new Image(this.getClass().getResource("application/icon.png").toString()));
-        Scene scene = new Scene(root, 600, 640, false, SceneAntialiasing.BALANCED);
+        Scene scene = new Scene(root, 840, 640, false, SceneAntialiasing.BALANCED);
         stage.setScene(scene);
         stage.show();
         stage.setOnCloseRequest(event -> {

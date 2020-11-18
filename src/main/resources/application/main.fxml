@@ -17,7 +17,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<TabPane fx:id="rootTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="640.0" prefWidth="600.0" stylesheets="@main.css" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainController">
+<TabPane fx:id="rootTabPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="640.0" prefWidth="840.0" stylesheets="@main.css" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainController">
    <tabs>
     <Tab fx:id="settingsTab" onSelectionChanged="#onTabSelection" text="Settings">
       <content>
@@ -78,69 +78,93 @@
       <content>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
-                  <VBox alignment="TOP_CENTER" spacing="10.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
+                  <HBox prefHeight="100.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <HBox alignment="TOP_CENTER" prefWidth="200.0" spacing="5.0">
+                        <VBox alignment="TOP_CENTER" spacing="10.0">
                            <children>
-                              <TextField fx:id="modSearchBar" prefWidth="400.0">
-                                 <opaqueInsets>
-                                    <Insets />
-                                 </opaqueInsets>
-                                 <HBox.margin>
-                                    <Insets left="29.0" />
-                                 </HBox.margin></TextField>
-                              <ImageView fitHeight="24.0" fitWidth="200.0" opacity="0.24" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@magnifying_glass_right.png" />
-                                 </image>
-                              </ImageView>
+                              <Label text="Configurations">
+                                 <font>
+                                    <Font size="24.0" />
+                                 </font>
+                              </Label>
+                              <ListView fx:id="configurationsListView" prefHeight="313.0" prefWidth="200.0" />
+                              <Button fx:id="createNewConfigButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="create new" />
+                              <Button fx:id="deleteSelectedConfigButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="delete selected" />
+                              <Button fx:id="exportSelectedConfigButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="export selected" />
+                              <Button fx:id="importConfigButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="import" />
+                           </children>
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                           <padding>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </padding>
+                        </VBox>
+                        <Separator orientation="VERTICAL" prefHeight="200.0" />
+                        <VBox alignment="TOP_CENTER" spacing="10.0">
+                           <children>
+                              <HBox alignment="TOP_CENTER" prefWidth="200.0" spacing="5.0">
+                                 <children>
+                                    <TextField fx:id="modSearchBar" prefWidth="400.0">
+                                       <opaqueInsets>
+                                          <Insets />
+                                       </opaqueInsets>
+                                       <HBox.margin>
+                                          <Insets left="29.0" />
+                                       </HBox.margin>
+                                    </TextField>
+                                    <ImageView fitHeight="24.0" fitWidth="200.0" opacity="0.24" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@magnifying_glass_right.png" />
+                                       </image>
+                                    </ImageView>
+                                 </children>
+                                 <padding>
+                                    <Insets left="10.0" right="10.0" />
+                                 </padding>
+                              </HBox>
+                              <HBox alignment="TOP_CENTER" spacing="20.0">
+                                 <children>
+                                    <VBox alignment="TOP_CENTER" prefWidth="256.0" spacing="10.0">
+                                       <children>
+                                          <Label text="Workshop">
+                                             <font>
+                                                <Font size="24.0" />
+                                             </font>
+                                          </Label>
+                                          <ListView fx:id="workshopModsListView" onMouseClicked="#onWorkshopItemSelection" prefHeight="358.0" prefWidth="200.0" />
+                                          <Button fx:id="copySelectedModButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCopySelectedAction" text="copy selected">
+                                             <VBox.margin>
+                                                <Insets />
+                                             </VBox.margin>
+                                          </Button>
+                                       </children>
+                                    </VBox>
+                                    <VBox alignment="TOP_CENTER" prefWidth="256.0" spacing="10.0">
+                                       <children>
+                                          <Label text="Starbound">
+                                             <font>
+                                                <Font size="24.0" />
+                                             </font>
+                                          </Label>
+                                          <ListView fx:id="serverModsListView" onMouseClicked="#onServerItemSelection" prefHeight="358.0" prefWidth="200.0" />
+                                          <Button fx:id="updateAllModsButton" maxWidth="420.0" mnemonicParsing="false" onAction="#onUpdateServerModsAction" text="update all" />
+                                          <Button fx:id="deleteSelectedModButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onDeleteServerModsAction" text="delete selected">
+                                             <VBox.margin>
+                                                <Insets />
+                                             </VBox.margin>
+                                          </Button>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </HBox>
                            </children>
                            <padding>
-                              <Insets left="10.0" right="10.0" />
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                            </padding>
-                        </HBox>
-                        <HBox alignment="TOP_CENTER" spacing="20.0">
-                           <children>
-                              <VBox alignment="TOP_CENTER" prefWidth="256.0" spacing="10.0">
-                                 <children>
-                                    <Label text="Workshop">
-                                       <font>
-                                          <Font size="24.0" />
-                                       </font>
-                                    </Label>
-                                    <ListView fx:id="workshopModsListView" onMouseClicked="#onWorkshopItemSelection" prefHeight="358.0" prefWidth="200.0" />
-                                    <Button fx:id="copySelectedButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCopySelectedAction" text="copy selected">
-                                       <VBox.margin>
-                                          <Insets />
-                                       </VBox.margin>
-                                    </Button>
-                                 </children>
-                              </VBox>
-                              <VBox alignment="TOP_CENTER" prefWidth="256.0" spacing="10.0">
-                                 <children>
-                                    <Label text="Starbound">
-                                       <font>
-                                          <Font size="24.0" />
-                                       </font>
-                                    </Label>
-                                    <ListView fx:id="serverModsListView" onMouseClicked="#onServerItemSelection" prefHeight="358.0" prefWidth="200.0" />
-                                    <Button fx:id="updateAllButton" maxWidth="420.0" mnemonicParsing="false" onAction="#onUpdateServerModsAction" text="update all" />
-                                    <Button fx:id="deleteSelectedButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onDeleteServerModsAction" text="delete selected">
-                                       <VBox.margin>
-                                          <Insets />
-                                       </VBox.margin>
-                                    </Button>
-                                 </children>
-                              </VBox>
-                           </children>
-                        </HBox>
-                        <VBox alignment="TOP_CENTER" spacing="10.0">
-                           <VBox.margin>
-                              <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
-                           </VBox.margin>
                         </VBox>
                      </children>
-                  </VBox>
+                  </HBox>
                </children></AnchorPane>
       </content>
     </Tab>
