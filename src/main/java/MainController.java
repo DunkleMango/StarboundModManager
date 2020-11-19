@@ -1,5 +1,6 @@
 import cache.CacheInformationProvider;
 import data.config.ServerConfig;
+import data.config.ServerConfigManager;
 import data.config.view.ServerConfigCell;
 import data.mod.ModData;
 import data.mod.ModDataManager;
@@ -17,6 +18,7 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +29,7 @@ import settings.AppSettingsCoordinator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 /**
@@ -46,8 +49,6 @@ public class MainController implements Initializable {
     // Mod-Control
     // --> Configurations
     public Button createNewConfigButton;
-    public Button deleteSelectedConfigButton;
-    public Button exportSelectedConfigButton;
     public Button importConfigButton;
     public ListView<ServerConfig> configurationsListView;
     // --> Mods
@@ -78,10 +79,29 @@ public class MainController implements Initializable {
         // --> Configurations
         configurationsListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         configurationsListView.setCellFactory(modConfigListView -> new ServerConfigCell());
-        ObservableList<ServerConfig> items = FXCollections.observableArrayList();
-        items.add(new ServerConfig("server 1"));
-        items.add(new ServerConfig("server 2"));
-        configurationsListView.setItems(items);
+        ServerConfigManager serverConfigManager = ServerConfigManager.getInstance();
+        serverConfigManager.setServerConfigListView(configurationsListView);
+        // --- dummy configs ---
+        serverConfigManager.addServerConfig(new ServerConfig("server 1"));
+        serverConfigManager.addServerConfig(new ServerConfig("server 2"));
+        // ---------------------
+        createNewConfigButton.setOnAction(actionEvent -> {
+            TextInputDialog dialog = new TextInputDialog("Choose a name for the new server config");
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(name -> ServerConfigManager.getInstance().addServerConfig(new ServerConfig(name)));
+        });
+        importConfigButton.setOnAction(actionEvent -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Select file to load");
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Configuration files (*.config)", "*.config"));
+            File file = fileChooser.showOpenDialog(null);
+            try {
+                ServerConfigManager.getInstance().addServerConfig(ServerConfig.importData(file));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
         // --> Mods
         ModDataManager modDataManager = ModDataManager.getInstance();

@@ -1,5 +1,7 @@
 package data.config;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,5 +38,19 @@ public class ServerConfig {
 
     public void rename(String name) {
         this.name = name;
+    }
+
+    public void exportData(File file) {
+        if (file != null && file.exists() && file.isFile()) {
+            // TODO - export config
+        }
+    }
+
+    public static ServerConfig importData(File file) throws IOException {
+        if (file != null && file.exists() && file.isFile()) {
+            // TODO - import config
+            return new ServerConfig("imported server config");
+        }
+        throw new IOException("Unable to load server config.");
     }
 }

@@ -89,8 +89,6 @@
                               </Label>
                               <ListView fx:id="configurationsListView" prefHeight="313.0" prefWidth="200.0" />
                               <Button fx:id="createNewConfigButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="create new" />
-                              <Button fx:id="deleteSelectedConfigButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="delete selected" />
-                              <Button fx:id="exportSelectedConfigButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="export selected" />
                               <Button fx:id="importConfigButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="import" />
                            </children>
                            <HBox.margin>
